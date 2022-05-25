@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stephenson-2</title>
+</head>
+
+<body>
+    <h1 style="text-align:center;width:98vw">g2-mechanism image</h1>
+    <button id="btn">correct !</button><br>
+    <canvas id="c" width="801" height="401" style="border:1px solid black;background-color:#eee;"></canvas><br>
+    <span id="out"></span>
+<script src="../../g2-ng/g2.core.js"></script>
+<script src="../../g2-ng/g2.hdl.canvas.js"></script>
+<script src="../cstr.js"></script>
+<script>
+const ctx = document.getElementById('c').getContext('2d');
+
+const A0= {x:0,y:0,base:true,r:6,ls:'navy',lw:2,fs:'snow'};
+const B0= {x:240,y:0,base:true,r:6,ls:'navy',lw:2,fs:'snow'};
+const A = {x:80,y:0,m:5,r:6,ls:'navy',lw:2,fs:'snow'};
+const B = {x:200,y:160,m:4,r:6,ls:'navy',lw:2,fs:'snow'};
+const C = {x:160,y:120,m:3,r:6,ls:'navy',lw:2,fs:'snow'};
+const D = {x:80,y:160,m:2,r:6,ls:'navy',lw:2,fs:'snow'};
+const E = {x:280,y:240,m:1,r:6,ls:'navy',lw:2,fs:'snow'};
+const g = g2().view({x:100,y:100,cartesian:true})
+              .clr()
+              .grid()
+              .lin({p1:A0,p2:A,ls:'navy',lw:3})
+              .lin({p1:A,p2:C,ls:'navy',lw:3})
+              .lin({p1:A,p2:D,ls:'navy',lw:3})
+              .lin({p1:C,p2:D,ls:'navy',lw:3})
+              .lin({p1:C,p2:B,ls:'navy',lw:3})
+              .lin({p1:B0,p2:B,ls:'navy',lw:3})
+              .lin({p1:B0,p2:E,ls:'navy',lw:3})
+              .lin({p1:B,p2:E,ls:'navy',lw:3})
+              .lin({p1:D,p2:E,ls:'navy',lw:3})
+              .cir(A0)
+              .cir(B0)
+              .cir(A)
+              .cir(B)
+              .cir(C)
+              .cir(D)
+              .cir(E)
+              .exe(ctx);
+const cA0A = cstr({id:'cA0A',n1:A0,n2:A,r:'const',w:0});
+const cAC  = cstr({id:'cAC',n1:A,n2:C,r:'const'});
+const cAD  = cstr({id:'cAD',n1:A,n2:D,r:'const'});
+const cCB  = cstr({id:'cCB',n1:C,n2:B,r:'const'});
+const cCD  = cstr({id:'cCD',n1:C,n2:D,r:'const'});
+const cB0B = cstr({id:'cB0B',n1:B0,n2:B,r:'const'});
+const cB0E = cstr({id:'cB0E',n1:B0,n2:E,r:'const'});
+const cBE  = cstr({id:'cBE',n1:B,n2:E,r:'const'});
+const cDE  = cstr({id:'cDE',n1:D,n2:E,r:'const'});
+
+document.getElementById('btn').addEventListener('click', correct);
+
+function pre() {
+    A0.dx = A0.dy = 0;
+    B0.dx = B0.dy = 0;
+    A.dx = A.dy = 0;
+    B.dx = B.dy = 0;
+    C.dx = C.dy = 0;
+    D.dx = D.dy = 0;
+    E.dx = E.dy = 0;
+}
+
+function post() {
+    A0.x += A0.dx; A0.y += A0.dy;
+    B0.x += B0.dx; B0.y += B0.dy;
+    A.x += A.dx; A.y += A.dy;
+    B.x += B.dx; B.y += B.dy;
+    C.x += C.dx; C.y += C.dy;
+    D.x += D.dx; D.y += D.dy;
+    E.x += E.dx; E.y += E.dy;
+}
+
+function correct() {
+//    pre();
+    cA0A.correct(); cAC.correct(); cCD.correct(); cAD.correct(); cB0B.correct(); 
+    cBE.correct(); cB0E.correct(); cCB.correct(); cDE.correct(); 
+//    post();
+//    g.exe(ctx);
+}
+
+cA0A.w = Math.PI/16;
+for (let i=0; i<32; i++)
+    correct();
+
+g.exe(ctx);
+cA0A.log(); cAC.log(); cCB.log(); cB0B.log(); 
+cAD.log(); cBE.log(); cCD.log(); cDE.log(); cB0E.log(); 
+
+
+</script>
+</body>
+</html>

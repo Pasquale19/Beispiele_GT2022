@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Erfurt-Getriebe</title>
+</head>
+
+<body>
+    <pre id="out">?</pre>
+    <canvas id="c" width="901" height="761" style="border:1px solid black;background-color:#eee;"></canvas><br>
+<script src="../../g2-ng/g2.js"></script>
+<script src="../cstr.js"></script>
+<script>
+
+const ctx = document.getElementById('c').getContext('2d');
+const interactor = canvasInteractor.create(ctx, {x:100,y:200,scl:0.75,cartesian:true});
+const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+
+const A0= {x:0,y:600,base:true,label:"A_0"};
+const B0= {x:330,y:945,base:true,label:"B_0"};
+const D0= {x:450,y:426,base:true,label:"D_0"};
+const H0= {x:20.727,y:400,base:true,label:"H_0"};
+const K0= {x:30.138,y:100,base:true,label:"K_0"};
+const A = {x:63.98787,y:633.00837,m:10,label:"A"};
+const B = {"x":465.19434,"y":839.9721,m:1,label:"B"};
+const C = {"x":519.22338,"y":723.92193,m:1,label:"C"};
+const D = {"x":408.22914,"y":506.39622,m:1,label:"D"};
+const E = {"x":398.41071,"y":600.65061,m:1,label:"E"};
+const F = {"x":57.166770,"y":503.10723,m:1,label:"F"};
+const G = {"x":175.00254,"y":583.2744,m:1,label:"G"};
+const H = {"x":20.727,"y":349,m:1,label:"H"};
+const I = {"x":325.68372,"y":699.35976,m:1,label:"I"};
+const J = {"x":249.10329,"y":575.64357,m:1,label:"J"};
+const K = {"x":30.138,"y":32.68239,m:1,label:"K"};
+
+const g = g2().clr()                           // important with 'interaction'
+              .view(interactor.view)           // view sharing ... !
+              .grid()
+              .lin({p1:A0,p2:A,ls:'navy',lw:3})
+              .lin({p1:A,p2:B,ls:'navy',lw:3})
+              .lin({p1:B0,p2:B,ls:'navy',lw:3})
+              .lin({p1:B0,p2:C,ls:'navy',lw:3})
+              .lin({p1:C,p2:D,ls:'navy',lw:3})
+              .lin({p1:D0,p2:D,ls:'navy',lw:3})
+              .lin({p1:D0,p2:E,ls:'navy',lw:3})
+              .lin({p1:D0,p2:I,ls:'navy',lw:3})
+              .lin({p1:I,p2:J,ls:'navy',lw:3})
+              .lin({p1:A,p2:J,ls:'navy',lw:3})
+              .lin({p1:E,p2:F,ls:'navy',lw:3})
+              .lin({p1:A0,p2:F,ls:'navy',lw:3})
+              .lin({p1:A0,p2:G,ls:'navy',lw:3})
+              .lin({p1:G,p2:H,ls:'navy',lw:3})
+              .lin({p1:J,p2:K,ls:'navy',lw:3})
+              .gnd(A0).gnd(B0).gnd(D0).gnd(H0).gnd(K0)
+              .hdl(A).nod(B).nod(C).nod(D).nod(E).nod(F).nod(G).nod(I).nod(J)
+              .slider({p:H,w:Math.PI/2,label:"H"})
+              .slider({p:K,w:Math.PI/2,label:"K"})
+
+
+const c = cstr().n2({id:'A0A',n1:A0,n2:A,len:'const'})
+                .n2({id:'AB',n1:A,n2:B,len:'const'})
+                .n2({id:'B0B',n1:B0,n2:B,len:'const'})
+                .n2({id:'B0C',n1:B0,n2:C,len:'const'})
+                .n3({id:'BoBC',n1:B0,n2:B,n3:C,ang:'const'})
+                .n2({id:'CD',n1:C,n2:D,len:'const'})
+                .n2({id:'D0D',n1:D0,n2:D,len:'const'})
+                .n2({id:'D0E',n1:D0,n2:E,len:'const'})
+                .n3({id:'D0DE',n1:D0,n2:D,n3:E,ang:'const'})
+                .n2({id:'D0I',n1:D0,n2:I,len:'const'})
+                .n3({id:'D0DI',n1:D0,n2:D,n3:I,ang:'const'})
+                .n2({id:'IJ',n1:I,n2:J,len:'const'})
+                .n2({id:'AJ',n1:A,n2:J,len:'const'})
+                .n2({id:'EF',n1:E,n2:F,len:'const'})
+                .n2({id:'A0F',n1:A0,n2:F,len:'const'})
+                .n2({id:'A0G',n1:A0,n2:G,len:'const'})
+                .n3({id:'A0FG',n1:A0,n2:F,n3:G,ang:'const'})
+                .n2({id:'GH',n1:G,n2:H,len:'const'})
+                .n2({id:'H0H',n1:H0,n2:H,ang:'const'})
+                .n2({id:'JK',n1:J,n2:K,len:'const'})
+                .n2({id:'K0K',n1:K0,n2:K,ang:'const'})
+
+interactor
+    .on('tick', (e) => {
+            document.getElementById('out').innerHTML = 'itr=' + c.correct();
+            g.exe(selector).exe(ctx); 
+        })
+    .on('pan',  (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+    .on('drag', (e) => { 
+            if (selector.selection && selector.selection.drag) {
+                selector.selection.drag({x:e.xusr,y:e.yusr,dx:e.dxusr,dy:e.dyusr,mode:'drag'});
+        }
+    })
+    .startTimer();
+
+</script>
+</body>
+</html>
