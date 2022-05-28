@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tiefziehkurbelpresse</title>
+</head>
+
+<body>
+    <h1 style="text-align:center;width:98vw">Tiefziehkurbelpresse</h1>
+    <pre id="out">?</pre>
+    <canvas id="c" width="901" height="901" style="border:1px solid black;background-color:#eee;"></canvas><br>
+    <span id="out"></span>
+    <script src="./lib/g2-ng/g2.js"></script>
+    <script src="./lib/cstr2/cstr.js"></script>
+    <script src="./../g2Extension/g2Extension/src/g2ExtraSymbols.js"></script>
+    <script src="./../g2Extension/g2Extension/src/g2ExtraCommands.js"></script>
+    <script>
+        const ctx = document.getElementById('c').getContext('2d');
+        const interactor = canvasInteractor.create(ctx, { x: 140, y: 40, cartesian: true });
+        const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+        const linkColor = "black";
+        const A0 = { x: 345.18, y: 603.9, base: true, m: 1, label: "A0" };
+        const A = { x: 389.07, y: 655.71, m: 1, label: { str: "A", loc: "n", off: 3 } };
+        const B0 = { x: 97.35, y: 554.4, base: true, m: 1, label: "B0" };
+        const B = { x: 219.45, y: 668.25, m: 1, label: { str: "B", loc: "n", off: 3 } };
+        const C = { x: 485.76, y: 539.88, m: 1, label: "C" };
+        const D = { x: 350.13, y: 359.7, m: 1, label: "D" };
+        const D0 = { x: 350.13, y: 363, base: true, m: 1, label: "D0" };
+
+
+
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const', ang: 'const' })
+            .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
+            .n2({ id: 'B0B', n1: B0, n2: B, len: 'const' })
+            .n2({ id: 'AC', n1: A, n2: C, len: 'const' })
+            .n3({ id: 'ABC', n1: A, n2: B, n3: C, ang: 'const' })
+            .n2({ id: 'DC', n1: D, n2: C, len: 'const' })
+            .n2({ id: 'D0D', n1: D0, n2: D, ang: -Math.PI / 2 })
+
+        const g = g2().clr()                           // important with 'interaction'
+            .view(interactor.view)           // view sharing ... !
+            .grid()
+            .lin({ p1: A0, p2: A, lw: 2, ls: linkColor })
+            .lin({ p1: B, p2: A, lw: 2, ls: linkColor })
+            .lin({ p1: B0, p2: B, lw: 2, ls: linkColor })
+            .lin({ p1: A, p2: C, lw: 2, ls: linkColor })
+            .lin({ p1: B, p2: C, lw: 2, ls: linkColor })
+            .lin({ p1: D, p2: C, lw: 2, ls: linkColor })
+            .lin({ p1: D0, p2: D, lw: 1, ls: linkColor })
+
+            //.ply({ pts: KK, lw: 2, ls: 'darkslategray', closed: false })
+            .gnd(A0).gnd(B0).gnd(D0)
+            .nod(A).nod(B).nod(C)
+            .slider({ p: D, w: 3.14 / 2 })
+
+
+
+        g.exe(ctx);
+
+        const crank = c.byId('A0A');
+        let itrmax = 0;
+
+        interactor
+            .on('tick', (e) => {
+                crank.ang += Math.PI / 180;
+                const itr = c.correct();
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrmax = Math.max(itr, itrmax)} / ${itr}`;
+                g.exe(ctx);
+                if (crank.ang >= 13 * Math.PI / 2)
+                    interactor.endTimer();
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag)
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+            })
+            .startTimer();
+
+    </script>
+</body>
+
+</html>

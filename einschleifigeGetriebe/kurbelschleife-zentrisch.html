@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,50 +11,52 @@
     <h1 style="text-align:center;width:98vw">Kurbelschleife-zentrisch</h1>
     <pre id="out">?</pre>
     <button onclick="c.correct();g.exe(ctx);c.log()">correct</button><br>
-    <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:#eee;"></canvas><br>
+    <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:transparent"></canvas><br>
     <span id="out"></span>
-<script src="../../g2-ng/g2.js"></script>
-<script src="../cstr.js"></script>
-<script>
-const ctx = document.getElementById('c').getContext('2d');
-const interactor = canvasInteractor.create(ctx, {x:200,y:200,cartesian:true});
-const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+    <script src="./../lib/g2-ng/g2.js"></script>
+    <script src="./../lib/cstr2/cstr.js"></script>
+    <script>
+        const ctx = document.getElementById('c').getContext('2d');
+        const interactor = canvasInteractor.create(ctx, { x: 200, y: 200, cartesian: true });
+        const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
 
-const e = 60;
-const A0= {x:0,y:0,base:true,label:'A0',lbloc:'s',lbloc:'s'};
-const B0= {x:3*e,y:0,base:true,label:'A0',lbloc:'s',lbloc:'s'};
-const A = {x:e,y:0,m:10,label:'A',lbloc:'n'};
-const B = {x:6*e,y:0,m:1,label:'B',lbloc:'n'};
+        const e = 60;
+        const A0 = { x: 0, y: 0, base: true, label: 'A0', lbloc: 's', lbloc: 's' };
+        const B0 = { x: 3 * e, y: 0, base: true, label: 'B0', lbloc: 's', lbloc: 's' };
+        const A = { x: e, y: 0, m: 10, label: 'A', lbloc: 'n' };
+        const B = { x: 6 * e, y: 0, m: 1, label: 'B', lbloc: 'n' };
 
-const g = g2().clr()                               // important with 'interaction'
-              .view(interactor.view)               // important also !
-              .grid()
-              .lin({p1:A0,p2:A,ls:'navy',lw:3})
-              .lin({p1:A,p2:B,ls:'navy',lw:3})
-              .gnd(A0)                             // grounds, joints
-              .gnd(B0)                             // grounds, joints
-              .hdl(A)
+        const g = g2().clr()                               // important with 'interaction'
+            .view(interactor.view)               // important also !
+            //.grid()
+            .lin({ p1: A0, p2: A, ls: 'navy', lw: 3 })
+            .lin({ p1: A, p2: B, ls: 'navy', lw: 3 })
+            .gnd(A0)                             // grounds, joints
+            .gnd(B0)                             // grounds, joints
+            .hdl(A)
 
-const c = cstr().n2({id:'A0A',n1:A0,n2:A,len:'const'})
-                .n2({id:'AB',n1:A,n2:B,len:'const'})
-                .n3({id:'AB0B',n1:A,n2:B0,n3:B,ang:0})
 
-let itrpeak = 0;
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
+            .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
+            .n3({ id: 'AB0B', n1: A, n2: B0, n3: B, ang: 0 })
 
-interactor
-    .on('tick', (e) => {
-        const itr = c.correct();
-        document.getElementById('out').innerHTML = `max/itr= ${itrpeak = Math.max(itr,itrpeak)} / ${itr}`;
-        g.exe(selector).exe(ctx); 
-    })
-    .on('pan',  (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
-    .on('drag', (e) => { 
-        if (selector.selection && selector.selection.drag) {
-            selector.selection.drag({x:e.xusr,y:e.yusr,dx:e.dxusr,dy:e.dyusr,mode:'drag'});
-        }
-    })
-    .startTimer();
+        let itrpeak = 0;
 
-</script>
+        interactor
+            .on('tick', (e) => {
+                const itr = c.correct();
+                document.getElementById('out').innerHTML = `max/itr= ${itrpeak = Math.max(itr, itrpeak)} / ${itr}`;
+                g.exe(selector).exe(ctx);
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag) {
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+                }
+            })
+            .startTimer();
+
+    </script>
 </body>
+
 </html>

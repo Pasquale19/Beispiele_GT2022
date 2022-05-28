@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stephenson-2 dragging</title>
+</head>
+
+<body>
+    <h1 style="text-align:center;width:98vw">Stephenson-2 dragging</h1>
+    <pre id="out">?</pre>
+    <canvas id="c" width="601" height="501" style="border:1px solid black;background-color:white;"></canvas><br>
+    <span id="out"></span>
+    <script src="./lib/g2-ng/g2.js"></script>
+    <script src="./lib/cstr2/cstr.js"></script>
+    <script>
+        const ctx = document.getElementById('c').getContext('2d');
+        const interactor = canvasInteractor.create(ctx, { x: 180, y: 140, cartesian: true });
+        const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+        const LinkColor = "black";
+
+        const A0 = { x: 0, y: 0, base: true, label: "A\u2080" };
+        const B0 = { x: 200, y: 0, base: true, label: "B\u2080" };
+        const A = { x: 0, y: 100, m: 10, label: "A" };
+        const B = { x: 180, y: 140, m: 1, label: "B" };
+        const C = { x: 60, y: 100, m: 1, label: "C" };
+        const D = { x: 100, y: 240, m: 1, label: "D" };
+        const E = { x: 260, y: 180, m: 1, label: "E" };
+        const g = g2().clr()                           // important with 'interaction'
+            .view(interactor.view)
+            //.grid()
+            .lin({ p1: A0, p2: A, ls: LinkColor, lw: 3 })
+            .lin({ p1: A, p2: C, ls: LinkColor, lw: 3 })
+            .lin({ p1: A, p2: D, ls: LinkColor, lw: 3 })
+            .lin({ p1: C, p2: D, ls: LinkColor, lw: 3 })
+            .lin({ p1: C, p2: B, ls: LinkColor, lw: 3 })
+            .lin({ p1: B0, p2: B, ls: LinkColor, lw: 3 })
+            .lin({ p1: B0, p2: E, ls: LinkColor, lw: 3 })
+            .lin({ p1: B, p2: E, ls: LinkColor, lw: 3 })
+            .lin({ p1: D, p2: E, ls: LinkColor, lw: 3 })
+            .gnd(A0)
+            .gnd(B0)
+            .hdl(A)
+            .nod(B)
+            .nod(C)
+            .nod(D)
+            .nod(E)
+
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
+            .n2({ id: 'AC', n1: A, n2: C, len: 'const' })
+            .n2({ id: 'AD', n1: A, n2: D, len: 'const' })
+            .n2({ id: 'CD', n1: C, n2: D, len: 'const' })
+            //                .n3({id:'ACD',n1:A,n2:C,n3:D,ang:'const'})
+            .n2({ id: 'CB', n1: C, n2: B, len: 'const' })
+            .n2({ id: 'DE', n1: D, n2: E, len: 'const' })
+            .n2({ id: 'BE', n1: B, n2: E, len: 'const' })
+            //                .n3({id:'B0BE',n1:B0,n2:B,n3:E,ang:'const'})
+            .n2({ id: 'B0B', n1: B0, n2: B, len: 'const' })
+            .n2({ id: 'B0E', n1: B0, n2: E, len: 'const' })
+
+        let itrpeak = 0;
+
+        interactor
+            .on('tick', (e) => {
+                const itr = c.correct();
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrpeak = Math.max(itr, itrpeak)} / ${itr}`;
+                g.exe(selector).exe(ctx);
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag) {
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+                }
+            })
+            .startTimer();
+
+    </script>
+</body>
+
+</html>

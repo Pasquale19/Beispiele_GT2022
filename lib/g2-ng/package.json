@@ -1,0 +1,29 @@
+{
+  "name": "g2d",
+  "version": "3.8.0",
+  "description": "g2 - a tiny 2d graphics command queue library",
+  "keywords": [
+    "vector",
+    "graphics",
+    "2d",
+    "command queue",
+    "canvas",
+    "svg",
+    "javascript"
+  ],
+  "main": "g2.js",
+  "scripts": {
+    "concat": "concat ./g2.core.js ./g2.ext.js ./g2.hdl.canvas.js ./g2.hdl.selector.js ../canvasInteractor/canvasInteractor.js > ./g2.js"
+  },
+  "author": "Stefan Goessner <fang03@web.de>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/goessner/g2.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "concat": "^1.0.0",
+    "jsdoc-to-markdown": "^5.0.3",
+    "uglify-es": "^3.3.9"
+  }
+}

@@ -4,11 +4,11 @@
 <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Schubkurbel-exzentrisch</title>
+    <title>Kreuzschubkurbel</title>
 </head>
 
 <body>
-    <h1 style="text-align:center;width:98vw">Schubkurbel-exzentrisch</h1>
+    <h1 style="text-align:center;width:98vw">Kreuzschubkurbel</h1>
     <pre id="out">?</pre>
     <button onclick="c.correct();g.exe(ctx);c.log()">correct</button><br>
     <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:transparent"></canvas><br>
@@ -21,26 +21,30 @@
         const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
 
         const e = 60;
-        const A0 = { x: 0, y: 0, base: true, label: 'A0', lbloc: 's' };
-        const AB0 = { x: 0, y: -e };
-        const B0 = { x: 4 * e, y: -e };
-        const A = { x: 0, y: e, m: 10, label: 'A', lbloc: 'n' };
-        const B = { x: 3 * e, y: -e, m: 1, label: 'B', lbloc: 'n' };
+        const A0 = { x: -1.5 * e, y: 1.5 * e, base: true, label: "A0", lbloc: "w" };
+        const A02 = { x: 1.5 * e, y: -1.5 * e, base: true };
+        const B0 = { x: 1.5 * e, y: 1.5 * e, base: true, label: "B0", lbloc: "e" };
+        const B02 = { x: -1.5 * e, y: -1.5 * e, base: true };
+        const A = { x: -e, y: e, m: 10, label: 'A', lbloc: 'n' };
+        const B = { x: 0, y: 0, m: 1, label: 'B', lbloc: 'n' };
 
         const g = g2().clr()                               // important with 'interaction'
             .view(interactor.view)               // important also !
             //.grid()
-            .lin({ p1: A0, p2: A, ls: 'navy', lw: 3 })
+            .lin({ p1: A0, p2: A02, ls: 'navy', lw: 1 })
+            .lin({ p1: B0, p2: B02, ls: 'navy', lw: 1 })
             .lin({ p1: A, p2: B, ls: 'navy', lw: 3 })
-            .lin({ x1: 100, y1: AB0.y, x2: 300, y2: AB0.y, lw: 1 })
-            // .ply({ pts: [A0, AB0, B0], ls: 'navy', lw: 1.5, ld: [22, 8, 2, 8] })
-            .gnd(A0)                                   // grounds, joints
+            .gnd(A0)                             // grounds, joints
+            .gnd(B0)                             // grounds, joints
             .hdl(A)
-            .slider({ p: B, w: 0, label: 'B' })
+            .hdl(B)
+            .slider({ p: A, w: Math.atan2(A02.y - A0.y, A02.x - A0.x) })
+            .slider({ p: B, w: Math.atan2(B02.y - B0.y, B02.x - B0.x) });
 
-        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
+
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, ang: 'const' })
             .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
-            .n3({ id: 'A0B', n1: AB0, n2: B0, n3: B, ang: 0 })
+            .n2({ id: 'B0B', n1: B0, n2: B, ang: "const" })
 
         let itrpeak = 0;
 
@@ -61,4 +65,4 @@
     </script>
 </body>
 
-</html>
+</

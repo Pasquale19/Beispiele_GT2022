@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,97 +13,103 @@
     <button onclick="c.correct();g.exe(ctx);c.log()">correct</button><br>
     <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:#eee;"></canvas><br>
     <span id="out"></span>
-<script src="../../g2-ng/g2.js"></script>
-<script src="../cstr.js"></script>
-<script src="../../v2/v2.js"></script>
-<script>
-const ctx = document.getElementById('c').getContext('2d');
-const interactor = canvasInteractor.create(ctx, {x:200,y:140,cartesian:true});
-const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+    <script src="./lib/g2-ng/g2.js"></script>
+    <script src="./lib/cstr2/cstr.js"></script>
 
-const e = 60;
-const A0= {x:0,y:0,base:true,label:"A0",lbloc:"s",lbloc:"s"};
-const B0= {x:3*e,y:-e,base:true,label:"B0",lbloc:"s"};
-const A = {x:0,y:e,m:10,label:"A",lbloc:"n"};
-const B = {x:e,y:e,m:1,label:"B",lbloc:"n"};
-const P = {x:0,y:2*e,m:0.1,label:"P",lbloc:"n"};
-const I = {x:-e,y:e,m:0.1,label:"I",lbloc:"s"};    // estimated
-const K = {x:3*e,y:e,m:0.1,label:"K",lbloc:"e"};   // estimated
-const Bw = {x:2*e,y:0,m:0.1,label:"Bw",lbloc:"ne"};// estimated
-const Aw = {x:-e,y:-e,m:0.1,label:"Aw",lbloc:"w"}; // estimated
-const W  = {x:e,y:0,m:0.1,label:"W",lbloc:"s"};    // estimated
-const g = g2().clr()                               // important with 'interaction'
-              .view(interactor.view)               // important also !
-              .grid()
-              .cir({p:{get x(){return (P.x+W.x)/2},
-                       get y(){return (P.y+W.y)/2}},
-                       get r(){return Math.hypot(P.x-W.x,P.y-W.y)/2},fs:'#aaa6'})
-              .lin({p1:A,p2:P,ls:'gray',ld:[10,4,2,4]})  // helper lines
-              .lin({p1:B,p2:P,ls:'gray',ld:[10,4,2,4]})
-              .lin({p1:A0,p2:I,ls:'gray',ld:[10,4,2,4]})
-              .lin({p1:A,p2:I,ls:'gray',ld:[10,4,2,4]})
-              .lin({p1:P,p2:I,ls:'gray',ld:[10,4,2,4]})
-              .lin({p1:P,p2:K,ls:'gray',ld:[10,4,2,4]})
-              .lin({p1:K,p2:Aw,ls:'gray',ld:[10,4,2,4]})
-              .lin({p1:A,p2:Aw,ls:'gray',ld:[10,4,2,4]})
-              .lin({p1:B,p2:Bw,ls:'gray',ld:[10,4,2,4]})
-              .lin({p1:Aw,p2:W,ls:'gray',ld:[10,4,2,4]})
-              .lin({p1:Bw,p2:W,ls:'gray',ld:[10,4,2,4]})
-              .lin({p1:A0,p2:A,ls:'navy',lw:3})          // links
-              .lin({p1:A,p2:B,ls:'navy',lw:3})
-              .lin({p1:A0,p2:A,ls:'navy',lw:3})
-              .lin({p1:B0,p2:B,ls:'navy',lw:3})
-              .lin({p1:A0,p2:B0,ls:'navy',lw:1.5,ld:[22,8,2,8]})
-              .gnd(A0)                                   // grounds, joints, poles
-              .gnd(B0)
-              .hdl(A)
-              .nod(B)
-              .pol(P)
-              .pol(I)
-              .pol(W)
-              .nod(K)                                    // helper points
-              .nod(Bw)
-              .nod(Aw)
+    <!-- <script src="https://cdn.jsdelivr.net/gh/goessner/v2/v2.min.js"></script>-->
+    <script>
+        const ctx = document.getElementById('c').getContext('2d');
+        const interactor = canvasInteractor.create(ctx, { x: 200, y: 140, cartesian: true });
+        const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
 
-const c = cstr().n2({id:'A0A',n1:A0,n2:A,len:'const'})
-                .n2({id:'AB',n1:A,n2:B,len:'const'})
-                .n2({id:'B0B',n1:B0,n2:B,len:'const'})
-                .n3({id:'ABI',n1:B,n2:A,n3:I,ang:0})
-                .n3({id:'A0B0I',n1:B0,n2:A0,n3:I,ang:0})
-                .n2({id:'A0B0',n1:A0,n2:B0})             // being referenced only ...
-                .n3({id:'A0AP',n1:A0,n2:A,n3:P,ang:0})
-                .n3({id:'B0BP',n1:B0,n2:B,n3:P,ang:0})
-                .n2({id:'IP',n1:I,n2:P})
-                .n2({id:'PK',n1:P,n2:K,get ang(){return this.root.byId('A0B0').w}})
-                .n3({id:'ABK',n1:A,n2:B,n3:K,ang:0})
-                .n2({id:'KBw',n1:K,n2:Bw,get ang(){return this.root.byId('IP').w}})
-                .n3({id:'B0BBw',n1:B0,n2:B,n3:Bw,ang:0})
-                .n2({id:'KAw',n1:K,n2:Aw,get ang(){return this.root.byId('IP').w}})
-                .n3({id:'A0AAw',n1:A0,n2:A,n3:Aw,ang:0})
-                .n3({id:'AwA0W',n1:Aw,n2:A0,n3:W,ang:Math.PI/2})
-                .n3({id:'BwB0W',n1:Bw,n2:B0,n3:W,ang:Math.PI/2})
+        const e = 60;
+        const A0 = { x: 0, y: 0, base: true, label: "A0", lbloc: "s", lbloc: "s" };
+        const B0 = { x: 3 * e, y: -e, base: true, label: "B0", lbloc: "s" };
+        const A = { x: 0, y: e, m: 10, label: "A", lbloc: "n" };
+        const B = { x: e, y: e, m: 1, label: "B", lbloc: "n" };
+        const P = { x: 0, y: 2 * e, m: 0.1, label: "P", lbloc: "n" };
+        const I = { x: -e, y: e, m: 0.1, label: "I", lbloc: "s" };    // estimated
+        const K = { x: 3 * e, y: e, m: 0.1, label: "K", lbloc: "e" };   // estimated
+        const Bw = { x: 2 * e, y: 0, m: 0.1, label: "Bw", lbloc: "ne" };// estimated
+        const Aw = { x: -e, y: -e, m: 0.1, label: "Aw", lbloc: "w" }; // estimated
+        const W = { x: e, y: 0, m: 0.1, label: "W", lbloc: "s" };    // estimated
+        const g = g2().clr()                               // important with 'interaction'
+            .view(interactor.view)               // important also !
+            // .grid()
+            .cir({
+                p: {
+                    get x() { return (P.x + W.x) / 2 },
+                    get y() { return (P.y + W.y) / 2 }
+                },
+                get r() { return Math.hypot(P.x - W.x, P.y - W.y) / 2 }, fs: '#aaa6'
+            })
+            .lin({ p1: A, p2: P, ls: 'gray', ld: [10, 4, 2, 4] })  // helper lines
+            .lin({ p1: B, p2: P, ls: 'gray', ld: [10, 4, 2, 4] })
+            .lin({ p1: A0, p2: I, ls: 'gray', ld: [10, 4, 2, 4] })
+            .lin({ p1: A, p2: I, ls: 'gray', ld: [10, 4, 2, 4] })
+            .lin({ p1: P, p2: I, ls: 'gray', ld: [10, 4, 2, 4] })
+            .lin({ p1: P, p2: K, ls: 'gray', ld: [10, 4, 2, 4] })
+            .lin({ p1: K, p2: Aw, ls: 'gray', ld: [10, 4, 2, 4] })
+            .lin({ p1: A, p2: Aw, ls: 'gray', ld: [10, 4, 2, 4] })
+            .lin({ p1: B, p2: Bw, ls: 'gray', ld: [10, 4, 2, 4] })
+            .lin({ p1: Aw, p2: W, ls: 'gray', ld: [10, 4, 2, 4] })
+            .lin({ p1: Bw, p2: W, ls: 'gray', ld: [10, 4, 2, 4] })
+            .lin({ p1: A0, p2: A, ls: 'navy', lw: 3 })          // links
+            .lin({ p1: A, p2: B, ls: 'navy', lw: 3 })
+            .lin({ p1: A0, p2: A, ls: 'navy', lw: 3 })
+            .lin({ p1: B0, p2: B, ls: 'navy', lw: 3 })
+            .lin({ p1: A0, p2: B0, ls: 'navy', lw: 1.5, ld: [22, 8, 2, 8] })
+            .gnd(A0)                                   // grounds, joints, poles
+            .gnd(B0)
+            .hdl(A)
+            .nod(B)
+            .pol(P)
+            .pol(I)
+            .pol(W)
+            .nod(K)                                    // helper points
+            .nod(Bw)
+            .nod(Aw)
+
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
+            .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
+            .n2({ id: 'B0B', n1: B0, n2: B, len: 'const' })
+            .n3({ id: 'ABI', n1: B, n2: A, n3: I, ang: 0 })
+            .n3({ id: 'A0B0I', n1: B0, n2: A0, n3: I, ang: 0 })
+            .n2({ id: 'A0B0', n1: A0, n2: B0 })             // being referenced only ...
+            .n3({ id: 'A0AP', n1: A0, n2: A, n3: P, ang: 0 })
+            .n3({ id: 'B0BP', n1: B0, n2: B, n3: P, ang: 0 })
+            .n2({ id: 'IP', n1: I, n2: P })
+            .n2({ id: 'PK', n1: P, n2: K, get ang() { return this.root.byId('A0B0').w } })
+            .n3({ id: 'ABK', n1: A, n2: B, n3: K, ang: 0 })
+            .n2({ id: 'KBw', n1: K, n2: Bw, get ang() { return this.root.byId('IP').w } })
+            .n3({ id: 'B0BBw', n1: B0, n2: B, n3: Bw, ang: 0 })
+            .n2({ id: 'KAw', n1: K, n2: Aw, get ang() { return this.root.byId('IP').w } })
+            .n3({ id: 'A0AAw', n1: A0, n2: A, n3: Aw, ang: 0 })
+            .n3({ id: 'AwA0W', n1: Aw, n2: A0, n3: W, ang: Math.PI / 2 })
+            .n3({ id: 'BwB0W', n1: Bw, n2: B0, n3: W, ang: Math.PI / 2 })
 
 
-//g.exe(ctx);
-//c.correct();
-//c.log()
+        //g.exe(ctx);
+        //c.correct();
+        //c.log()
 
-let itrpeak = 0;
+        let itrpeak = 0;
 
-interactor
-    .on('tick', (e) => {
-        const itr = c.correct();
-        document.getElementById('out').innerHTML = `itr/max= ${itr} / ${itrpeak = Math.max(itr,itrpeak)}`;
-        g.exe(selector).exe(ctx); 
-        })
-    .on('pan',  (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
-    .on('drag', (e) => { 
-        if (selector.selection && selector.selection.drag) {
-            selector.selection.drag({x:e.xusr,y:e.yusr,dx:e.dxusr,dy:e.dyusr,mode:'drag'});
-        }
-    })
-    .startTimer();
+        interactor
+            .on('tick', (e) => {
+                const itr = c.correct();
+                document.getElementById('out').innerHTML = `itr/max= ${itr} / ${itrpeak = Math.max(itr, itrpeak)}`;
+                g.exe(selector).exe(ctx);
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag) {
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+                }
+            })
+            .startTimer();
 
-</script>
+    </script>
 </body>
+
 </html>

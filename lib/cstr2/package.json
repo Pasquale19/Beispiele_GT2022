@@ -1,0 +1,8 @@
+{
+  "name": "mj-constraints",
+  "description": "Planar Constraints between Dimensionless Nodes",
+  "version": "0.2.0",
+  "author": "sg",
+	"license": "MIT",
+  "microjam": {}
+}

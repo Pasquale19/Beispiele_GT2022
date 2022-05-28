@@ -30,7 +30,7 @@
             .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
             .n2({ id: 'B0B', n1: B0, n2: B, len: 'const' });
 
-
+        g2.symbol.labelSignificantDigits = 0;
         const g = g2().clr()                           // important with 'interaction'
             .view(interactor.view)           // view sharing ... !
             .ply({ pts: [A0, A, B, B0], lw: 2, ls: 'darkslategray' })
@@ -39,7 +39,7 @@
             .hdl(A)
             .hdl(B)
             .gnd(B0)
-            .angle({ p: B, p1: B0, p2: A, side: -1, label: { str: "\03BC;@angle;°" } })
+            .angle({ p: B, p1: A, p2: B0, side: 1, label: { str: "\03BC;@angle;°" } })
         g.exe(ctx);
 
         let itrmax = 0;

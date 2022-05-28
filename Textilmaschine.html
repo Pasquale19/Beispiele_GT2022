@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Textilmaschine</title>
+</head>
+
+<body>
+    <h1 style="text-align:center;width:98vw">Textilmaschine</h1>
+    <pre id="out">?</pre>
+    <canvas id="c" width="901" height="901" style="border:1px solid black;background-color:transparent"></canvas><br>
+    <span id="out"></span>
+    <script src="./lib/g2-ng/g2.js"></script>
+    <script src="./lib/cstr2/cstr.js"></script>
+    <script src="./../g2Extension/g2Extension/src/g2ExtraSymbols.js"></script>
+    <script src="./../g2Extension/g2Extension/src/g2ExtraCommands.js"></script>
+
+    <script>
+        const ctx = document.getElementById('c').getContext('2d');
+        const interactor = canvasInteractor.create(ctx, { x: 140, y: 140, cartesian: true });
+        const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+        const linkColor = "black";
+        g2.symbol.nodfill = "white";
+        g2.symbol.nodfill2 = "white";
+        const A0 = { x: 0, y: 0, base: true, m: 1, label: { str: "A\u2080", loc: 'w' } };
+        const A = { x: 28.743585, y: 8.591085, m: 2, label: "A" };
+        const B0 = { x: 188.4, y: -51.75, base: true, m: 1, label: { str: "B\u2080", loc: "e" } };
+        const B = { x: 182.76258, y: 54.66318, m: 1, label: { str: "B", loc: "e" } };
+        const C = { x: 49.460895, y: 155.66535, m: 1, label: { str: "C", loc: "nw" } };
+        const D = { x: 92.242725, y: 68.847375, m: 1, label: "D" };
+        const D0 = { x: 158.7, y: 216, base: true, m: 1, label: "D\u2080" };
+        const E = { x: 4.357155, y: 208.81428, m: 1, label: "E" };
+        const F = { x: 4.64784, y: 419.82531, m: 1, label: { str: "F", off: "7", loc: "e" } };
+        const F0 = { x: F.x, y: 375, base: true, m: 1, label: "F0" };
+        const G = { x: -33, y: 542.805, m: 1, label: { str: "G", loc: "e" } };
+
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const', ang: 'const' })
+            .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
+            .n2({ id: 'B0B', n1: B0, n2: B, len: 'const' })
+            .n2({ id: 'AC', n1: A, n2: C, len: 'const' })
+            .n2({ id: 'DC', n1: D, n2: C, len: 'const' })
+            .n2({ id: 'D0D', n1: D0, n2: D, len: 'const' })
+            .n2({ id: 'D0E', n1: D0, n2: E, len: 'const' })
+            .n3({ id: 'DD0E', n1: D0, n2: D, n3: E, ang: 'const' })
+            .n2({ id: 'EF', n1: E, n2: F, len: 'const' })
+            .n2({ id: 'F0F', n1: F0, n2: F, ang: 'const' })
+            .n3({ id: 'ABC', n1: C, n2: A, n3: B, ang: 'const' })
+            .n2({ id: 'FG', n1: F, n2: G, len: 'const', ang: 'const' })
+
+        const g = g2().clr()                           // important with 'interaction'
+            .view(interactor.view)           // view sharing ... !
+
+            .lin({ p1: A0, p2: A, lw: 2, ls: linkColor })
+            .lin({ p1: B, p2: A, lw: 2, ls: linkColor })
+            .lin({ p1: B0, p2: B, lw: 2, ls: linkColor })
+            .lin({ p1: D0, p2: D, lw: 2, ls: linkColor })
+            .lin({ p1: D0, p2: E, lw: 2, ls: linkColor })
+            .lin({ p1: A, p2: C, lw: 2, ls: linkColor })
+            .lin({ p1: D, p2: C, lw: 2, ls: linkColor })
+            .lin({ p1: F, p2: E, lw: 2, ls: linkColor })
+            .lin({ p1: F, p2: G, lw: 2, ls: linkColor })
+            .ply({ pts: [A0, A, B, B0], lw: 2, ls: 'darkslategray' })
+            .slider({ p: F, w: 3.14 / 2 })
+            .Ecke({ p1: B, p2: A, p3: C, size: 50 })
+            .Ecke({ p1: D, p2: D0, p3: E, size: 50 })
+            .Ecke({ p1: G, p2: F, p3: E, size: 60 })
+            .nodfix2(D0)
+            .gnd(D0)
+            .nodfix2({ p: A0, label: { str: "A\u2080", loc: "w", off: "5" } })
+            .nodfix2(B0)
+            .guide({ p1: F0, x2: F0.x, y2: F0.y + 110 })
+            .nod(A)
+            .nod(D)
+            .nod(E)
+            .nod(F)
+            .nod(C)
+            .nod(B)
+            .nod(G)
+        g.exe(ctx);
+
+        const crank = c.byId('A0A');
+        let itrmax = 0;
+
+        interactor
+            .on('tick', (e) => {
+                crank.ang += Math.PI / 180;
+                const itr = c.correct();
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrmax = Math.max(itr, itrmax)} / ${itr}`;
+                g.exe(ctx);
+                if (crank.ang >= 130 * Math.PI / 2)
+                    interactor.endTimer();
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .startTimer();
+
+    </script>
+</body>
+
+</html>
