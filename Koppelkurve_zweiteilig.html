@@ -21,7 +21,7 @@
     <button id="btn" onclick=clicked()>Debug</button>
     <script>
         const ctx = document.getElementById('c').getContext('2d');
-        const interactor = canvasInteractor.create(ctx, { x: 140, y: 140, cartesian: true });
+        const interactor = canvasInteractor.create(ctx, { x: 140, y: 190, cartesian: true });
         const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
         const VH = Math.tan(48 * Math.PI / 180);
         const mu = VH, lam = 1;
@@ -30,7 +30,7 @@
             B = { x: 165, y: 131.42, label: { str: 'B', loc: 'ne' } },
             B0 = { x: 200, y: 0, base: true, label: { str: 'B\u2080', loc: 'se' } },
             B2 = { x: B.x, y: -B.y, label: "B2" };
-        const D1 = { x: 0, y: 0, label: "D1" }, D2 = { x: 0, y: 0, label: "D2" }, D3 = { x: 0, y: 0, label: "D3" };
+        const D1 = { x: 233.337, y: 42.633, label: "D\u2081" }, D2 = { x: -43.8816, y: 145.313, label: "D\u2082", lbloc: "w" }, D3 = { x: 104.085, y: 266.474, label: "D\u2083", lbloc: "n" };
         const v2A = v2(A.x, A.y), v2AB = v2(B.x - A.x, B.y - A.y), v2AB2 = v2(B2.x - A.x, B2.y - A.y);
         const v2K = v2A.add(v2AB.simtrf(mu, lam));
         const v2K2 = v2A.add(v2AB2.simtrf(mu, lam));
@@ -41,12 +41,12 @@
 
         let phiKurbel = Math.atan2(A.y, A.x);
         let KK = [], KK2 = [];
-        let M = g2.arc3pts(A0.x, A0.y, B0.x, B0.y, C0.x, C0.y); //Korrekt wäre {x:100,y:0,r:100}
-        console.log(M);
+        let M = g2.arc3pts(A0.x, A0.y, B0.x, B0.y, C0.x, C0.y); //berechnet falsches Ergebnis bei {0,0,200,0,100,100} => Korrekt {x:100,y:0,r:100}
+        //   console.log(M);
         //M = { x: 100, y: 0, r: 100 };
 
         const r_angle = 60;
-        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const', ang: "const" })
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
             .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
             .n2({ id: 'B0B', n1: B0, n2: B, len: 'const' })
             .n2({ id: 'AK', n1: K, n2: A, len: 'const' })
@@ -68,13 +68,13 @@
             .gnd(A0).hdl(A).nod(B).nod(K)
             .nod(B2).nod(K2)
 
-            /// .nod(D1).nod(D2).nod(D3)
-            .nod({ x: C0.x, y: C0.y, label: { str: "C\u2080", loc: "n" } })
-            .cir({ x: M.x, y: M.y, ls: "orange", r: M.r, label: "d", lbloc: "s" })
+            .nod(D1).nod(D2).nod(D3)
+            .nod({ x: C0.x, y: C0.y, label: { str: "C\u2080", loc: "ne" } })
+            .cir({ x: M.x, y: M.y, ls: "orange", r: M.r, label: "d", lbloc: "e" })
             .gnd(B0)
-            .ply({ pts: KK, lw: 2, ls: 'green', ld: [3, 3], closed: false, label: "k_K" })
+            .ply({ pts: KK, lw: 2, ls: 'green', ld: [3, 3], closed: false, label: { str: "k_K", off: 3, loc: "beg" } })
             .ply({ pts: KK2, lw: 2, ls: 'green', ld: [3, 3], closed: false, label: "k_K2" })
-            .angle({ p1: A, p: B, p2: K, anz: 2, r: r_angle })
+            .angle({ p1: A, p: B, p2: K, anz: 2, r: r_angle, small: true })
             .angle({ p1: K, p: A, p2: B, r: r_angle })
             .angle({ p1: B2, p: A, p2: K2, r: r_angle })
             .angle({ p1: C0, p: A0, p2: B0, r: r_angle })
@@ -89,10 +89,10 @@
         interactor
             .init((e) => {  // create coupler curve
                 const w0 = crank.ang;
-                for (let w = 0; w <= 2 * Math.PI; w += Math.PI / 90) {
+                for (let w = 0; w <= 2 * Math.PI + 3 * Math.PI / 90; w += Math.PI / 180) {
                     A.x = Math.cos(w) * 67.9;
                     A.y = Math.sin(w) * 67.9;
-                    crank.ang = w0 + w;
+                    //  crank.ang = w0 + w;
                     c.correct();
                     KK.push({ x: K.x, y: K.y });
                     KK2.push({ x: K2.x, y: K2.y });
@@ -118,7 +118,7 @@
             .startTimer();
 
         function clicked() {
-            console.log(`K1: x:${K1.x} y:${K1.y} `);
+            console.log(`K: x:${K.x} y:${K.y} `);
             console.log(`K2: x:${K2.x} y:${K2.y} `);
 
         }; //document.getElementById("btn").onclick = click();
