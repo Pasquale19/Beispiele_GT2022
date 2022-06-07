@@ -26,6 +26,10 @@
         const A = { x: e, y: 0, m: 10, label: 'A', lbloc: 'n' };
         const B = { x: 6 * e, y: 0, m: 1, label: 'B', lbloc: 'n' };
 
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
+            .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
+            .n3({ id: 'AB0B', n1: A, n2: B0, n3: B, ang: 0 })
+
         const g = g2().clr()                               // important with 'interaction'
             .view(interactor.view)               // important also !
             //.grid()
@@ -36,9 +40,8 @@
             .hdl(A)
 
 
-        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
-            .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
-            .n3({ id: 'AB0B', n1: A, n2: B0, n3: B, ang: 0 })
+
+
 
         let itrpeak = 0;
 

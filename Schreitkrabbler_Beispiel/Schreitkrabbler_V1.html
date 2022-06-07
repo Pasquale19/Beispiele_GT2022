@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Doppelkurbel</title>
+</head>
+
+<body>
+    <pre id="out">?</pre>
+    <pre id="AngleDisplay">?</pre>
+    <canvas id="c" width="901" height="761" style="border:1px solid black;background-color:#eee;"></canvas><br>
+    <script src="./../lib/cstr2/cstr.js"></script>
+    <script src="./../lib/g2-ng/g2.js"></script>
+    <script src="./../lib/v2.js"></script>
+
+
+    <script>
+
+
+        const ctx = document.getElementById('c').getContext('2d');
+        const interactor = canvasInteractor.create(ctx, { x: 100, y: 100, scl: 0.75, cartesian: true });
+        const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+
+        const P1 = { x: 0, y: 0, base: true, label: "P1" };
+        const P2 = { x: 190.92, y: 190.92, m: 8, label: "P2" };
+        const P3 = { x: -75, y: 129.9, base: true, label: "P3" };
+        const P5 = { x: 115.92, y: 320.82, m: 1, label: "P5" };
+
+        const P4 = { x: 52.56, y: -91.02, base: true, label: "P4" };
+        const P6 = { x: 243.45, y: 99.9, m: 1, label: "P6" };
+
+        const P8 = { x: 85.83, y: 190.92, m: 1, label: "P8" };
+        const P7 = { x: 370.92, y: -120.84, m: 2, label: "P7" };
+        const P9 = { x: 265.83, y: -120.84, m: 1, label: "P9" };
+        const TCP = { x: 583.35, y: -195.03, m: 1, label: "TCP" };
+        console.log(g2.symbol);
+
+
+        const g = g2().clr()                           // important with 'interaction'
+            .view(interactor.view)           // view sharing ... !
+            .grid()
+            .lin({ p1: P1, p2: P2, ls: 'navy', lw: 3 })
+            .lin({ p1: P3, p2: P5, ls: 'navy', lw: 3 })
+            .lin({ p1: P2, p2: P5, ls: 'navy', lw: 3 })
+            .lin({ p1: P4, p2: P6, ls: 'navy', lw: 3 })
+            .lin({ p1: P2, p2: P6, ls: 'navy', lw: 3 })
+            .lin({ p1: P2, p2: P8, ls: 'navy', lw: 3 })
+            .lin({ p1: P5, p2: P8, ls: 'navy', lw: 3 })
+            .lin({ p1: P7, p2: P9, ls: 'navy', lw: 3 })
+            .lin({ p1: P8, p2: P9, ls: 'navy', lw: 3 })
+            .lin({ p1: P2, p2: P6, ls: 'navy', lw: 3 })
+            .lin({ p1: P6, p2: P7, ls: 'green', ld: [6, 3], lw: 3 })
+            .lin({ p1: TCP, p2: P7, ls: 'black', lw: 3, label: "@len" })
+            .gnd(P1)
+            .gnd(P3)
+            .gnd(P4)
+            .hdl(P2).nod(P3).hdl(P5).hdl(P6).nod(P8).nod(P9).nod(P7).pol(TCP)
+
+
+
+        const c = cstr()
+            .n2({ id: 'L12', n1: P1, n2: P2, len: 'const' })
+            .n2({ id: 'L25', n1: P2, n2: P5, len: 'const' })
+            .n2({ id: 'L35', n1: P3, n2: P5, len: 'const', get ang() { return this.root.byId('L12').ang } })
+            .n2({ id: 'L26', n1: P2, n2: P6, len: 'const' })
+            .n2({ id: 'L46', n1: P4, n2: P6, len: 'const', get ang() { return this.root.byId('L12').ang } })
+            .n2({ id: 'L28', n1: P2, n2: P8, len: 'const' })
+        //.n2({ id: 'L89', n1: P8, n2: P9, len: 'const' })
+        // .n2({ id: 'L79', n1: P7, n2: P9, len: 'const', get ang() { return this.root.byId('L12').ang } })
+        // .n2({ id: 'L69', n1: P7, n2: P9, len: 'const' })
+        // .n3({ id: 'L897', n1: P8, n2: P9, n3: P7, ang: 'const' })
+        //.n3({ id: 'L897', n1: P2, n2: P6, n3: P7, ang: 'const' })
+        // .n2({ id: 'alpha', n1: P8, n2: P5, len: 'const' })
+        // .n2({ id: 'LWZ', n1: TCP, n2: P7, len: 'const' })
+        // .n3({ id: 'tri', n1: P9, n2: P7, n3: TCP, ang: 'const' })
+
+        const crank = c.byId('L12');
+        let itrmax = 0;
+        interactor
+            .on('tick', (e) => {
+                const itr = c.correct();
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrmax = Math.max(itr, itrmax)} / ${itr}`;
+                g.exe(selector).exe(ctx);
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag)
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+            })
+            .on('drag', (e) => {
+                console.log(crank.w);
+                document.getElementById('AngleDisplay').innerHTML = `phi = ${Math.round(crank.w * 180 / Math.PI)} °`;
+            })
+            .on('drag', (e) => {
+                let K = { x: TCP.x, y: TCP.y };
+                g.nod(K);
+                g.exe(selector).exe(ctx);
+            })
+            .startTimer();
+
+    </script>
+</body>
+
+</html>

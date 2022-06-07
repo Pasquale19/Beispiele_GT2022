@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Schreitkrabbler</title>
+</head>
+
+<body>
+    <h1>Schreitkrabbler-working</h1>
+    <pre id="out">?</pre>
+    <pre id="AngleDisplay">?</pre>
+    <canvas id="c" width="1101" height="861" style="border:1px solid black;background-color:transparent;"></canvas><br>
+    <script src="./../lib/cstr2/cstr.js"></script>
+    <script src="./../lib/g2-ng/g2.js"></script>
+    <script src="./../../g2Extension/g2Extension/src/g2ExtraCommands.js"></script>
+    <script src="./../lib/v2.js"></script>
+
+
+    <script>
+
+
+        const ctx = document.getElementById('c').getContext('2d');
+        const interactor = canvasInteractor.create(ctx, { x: 300, y: 500, scl: 0.75, cartesian: true });
+        const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+
+        const P1 = { x: 0, y: 0, base: true, label: "P1" };
+        const H1 = { x: 0, y: 0, base: true };//Hilfspunkt
+        const P2 = { x: 190.92, y: 190.92, m: 8, label: "P2", lbloc: "e" };
+        const P3 = { x: -75, y: 129.9, base: true, label: "P3" };
+        const P5 = { x: 115.92, y: 320.82, m: 1, label: "P5", lbloc: "e" };
+
+        const P4 = { x: 52.56, y: -91.02, base: true, label: "P4" };
+        const P6 = { x: 243.45, y: 99.9, m: 1, label: "P6" };
+
+        const P8 = { x: 85.83, y: 190.92, m: 1, label: "P8" };
+        const P7 = { x: 370.92, y: -120.84, m: 2, label: "P7", lbloc: "ne" };
+        const P9 = { x: 265.83, y: -120.84, m: 1, label: "P9" };
+        const TCP = { x: 583.35, y: -195.03, m: 1, label: "TCP" };
+        const KK = [];//coupler curve
+
+
+
+        const g = g2().clr()                           // important with 'interaction'
+            .view(interactor.view)           // view sharing ... !
+            //   .grid()
+            .lin({ p1: P1, p2: P2, ls: 'navy', lw: 3, label: "L12" })
+            .lin({ p1: P3, p2: P5, ls: 'navy', lw: 3, label: "L35" })
+            .lin({ p1: P2, p2: P5, ls: 'navy', lw: 3, label: "L25" })
+            .lin({ p1: P4, p2: P6, ls: 'navy', lw: 3, label: "L46" })
+            .lin({ p1: P2, p2: P6, ls: 'navy', lw: 3, label: "L26" })
+            .angle({ p: P1, p1: H1, p2: P2, ls: "green", label: "@angle;°", r: 50 }) //not perfomant
+            .lin({ p1: P2, p2: P8, ls: 'navy', lw: 3, label: "L28" })
+
+            .lin({ p1: P7, p2: P9, ls: 'navy', lw: 3, label: "L79" })
+            .lin({ p1: P8, p2: P9, ls: 'navy', lw: 3 })
+
+            .lin({ p1: P2, p2: P7, ls: 'navy', lw: 3, label: { str: "L27", lbloc: "0.8" } })
+            .lin({ p1: TCP, p2: P7, ls: 'navy', lw: 3 })
+            .ply({ pts: KK, ls: 'red', lw: 1, closed: true, ld: [3, 3] })
+            .Ecke({ p1: P9, p2: P7, p3: TCP, ls: "navy", size: 90 })
+            .gnd(P1)
+            .gnd(P3)
+            .gnd(P4)
+            .hdl(P2).nod(P3).hdl(P5).hdl(P6).nod(P8).nod(P9).nod(P7).pol(TCP)
+
+
+
+        const c = cstr()
+            .n2({ id: 'L12', n1: P1, n2: P2, len: 'const' })
+            .n2({ id: 'L25', n1: P2, n2: P5, len: 'const', ang: 120 * Math.PI / 180 })
+            .n2({ id: 'L35', n1: P3, n2: P5, len: 'const', })
+            .n2({ id: 'L26', n1: P2, n2: P6, len: 'const', ang: 120 * Math.PI / 180 })
+            .n2({ id: 'L46', n1: P4, n2: P6, len: 'const' })
+            .n2({ id: 'L28', n1: P2, n2: P8, len: 'const', ang: 0 })
+            .n2({ id: 'L89', n1: P8, n2: P9, len: 'const' })
+            .n2({ id: 'L79', n1: P7, n2: P9, len: 'const', ang: 0 })
+            .n2({ id: 'L27', n1: P2, n2: P7, len: 'const', ang: 120 * Math.PI / 180 })
+            .n2({ id: 'LWZ', n1: TCP, n2: P7, len: 'const', ang: 160.75 * Math.PI / 180 })
+
+        const crank = c.byId('L12');
+        let itrmax = 0;
+        interactor
+            .init((e) => {  // create coupler curve
+                for (let w = 0; w <= 2 * Math.PI; w += Math.PI / 90) {
+                    P2.x = Math.cos(w) * 67.9 + P1.x;
+                    P2.y = Math.sin(w) * 67.9 + P1.y;
+                    c.correct();
+                    KK.push({ x: TCP.x, y: TCP.y });
+                }
+            })
+            .on('tick', (e) => {
+                const itr = c.correct();
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrmax = Math.max(itr, itrmax)} / ${itr}`;
+                g.exe(selector).exe(ctx);
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag)
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+            })
+            .on('drag', (e) => {
+                document.getElementById('AngleDisplay').innerHTML = `phi = ${Math.round(crank.w * 180 / Math.PI)} °`;
+            })
+            .on('wheel', (e) => {   // zooming about pointer location ...=> CanvasInteractor
+                interactor.view.x = e.x + e.dscl * (interactor.view.x - e.x);
+                interactor.view.y = e.y + e.dscl * (interactor.view.y - e.y);
+                interactor.view.scl *= e.dscl;
+            })
+            .startTimer();
+
+    </script>
+</body>
+
+</html>

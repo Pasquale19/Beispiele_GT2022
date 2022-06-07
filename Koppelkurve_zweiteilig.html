@@ -26,22 +26,22 @@
         const VH = Math.tan(48 * Math.PI / 180);
         const mu = VH, lam = 1;
         const A0 = { x: 0, y: 0, base: true, label: { str: 'A\u2080', loc: 'sw' } },
-            A = { x: 62.85, y: 25.717, label: { str: 'A', loc: 'nw' }, m: 2 },
+            A = { x: 75, y: 0, label: { str: 'A', loc: 'nw' }, m: 2 },
             B = { x: 165, y: 131.42, label: { str: 'B', loc: 'ne' } },
             B0 = { x: 200, y: 0, base: true, label: { str: 'B\u2080', loc: 'se' } },
-            B2 = { x: B.x, y: -B.y, label: "B2" };
-        const D1 = { x: 233.337, y: 42.633, label: "D\u2081" }, D2 = { x: -43.8816, y: 145.313, label: "D\u2082", lbloc: "w" }, D3 = { x: 104.085, y: 266.474, label: "D\u2083", lbloc: "n" };
+            B2 = { x: B.x, y: -B.y, label: "B\u2082" };
+        const D1 = { x: 217.737, y: 18.71213, label: "D\u2081", lbloc: "e" }, D2 = { x: 87.3524, y: 261.976, label: "D\u2082", lbloc: "n" }, D3 = { x: -38.373, y: 166.7914, label: "D\u2083", lbloc: "nw" };
         const v2A = v2(A.x, A.y), v2AB = v2(B.x - A.x, B.y - A.y), v2AB2 = v2(B2.x - A.x, B2.y - A.y);
         const v2K = v2A.add(v2AB.simtrf(mu, lam));
         const v2K2 = v2A.add(v2AB2.simtrf(mu, lam));
         K = { x: v2K.x, y: v2K.y, label: "K" };
-        K2 = { x: v2K2.x, y: v2K2.y, label: "K2" };
+        K2 = { x: v2K2.x, y: v2K2.y, label: "K\u2082" };
         const C0 = v2(B0.x - A0.x, B0.y - A0.y).simtrf(mu, lam);
 
 
         let phiKurbel = Math.atan2(A.y, A.x);
         let KK = [], KK2 = [];
-        let M = g2.arc3pts(A0.x, A0.y, B0.x, B0.y, C0.x, C0.y); //berechnet falsches Ergebnis bei {0,0,200,0,100,100} => Korrekt {x:100,y:0,r:100}
+        let M = g2.cir3pts(A0.x, A0.y, B0.x, B0.y, C0.x, C0.y); //berechnet falsches Ergebnis bei {0,0,200,0,100,100} => Korrekt {x:100,y:0,r:100}
         //   console.log(M);
         //M = { x: 100, y: 0, r: 100 };
 
@@ -60,8 +60,8 @@
         const g = g2().clr()                           // important with 'interaction'
             .view(interactor.view)           // view sharing ... !
             .ply({ pts: [A0, A, B, B0], lw: 2, ls: 'darkslategray' })
-            .ply({ pts: [A, K, B], lw: 2, fs: 'lightgrey', closed: true })
-            .ply({ pts: [A, K2, B2], lw: 2, fs: 'yellow', closed: true })
+            .ply({ pts: [A, K, B], lw: 2, fs: 'lightyellow', closed: true })
+            .ply({ pts: [A, K2, B2], lw: 2, fs: 'lightgrey', closed: true })
             .lin({ p1: B0, p2: B2, lw: 2 })
 
             .ply({ pts: [A0, C0, B0], lw: 1, ls: 'black', closed: true })
@@ -72,8 +72,9 @@
             .nod({ x: C0.x, y: C0.y, label: { str: "C\u2080", loc: "ne" } })
             .cir({ x: M.x, y: M.y, ls: "orange", r: M.r, label: "d", lbloc: "e" })
             .gnd(B0)
-            .ply({ pts: KK, lw: 2, ls: 'green', ld: [3, 3], closed: false, label: { str: "k_K", off: 3, loc: "beg" } })
-            .ply({ pts: KK2, lw: 2, ls: 'green', ld: [3, 3], closed: false, label: "k_K2" })
+            .ply({ pts: KK, lw: 2, ls: 'green', ld: [3, 3], closed: false })
+            .ply({ pts: KK2, lw: 2, ls: 'green', ld: [3, 3], closed: false })
+
             .angle({ p1: A, p: B, p2: K, anz: 2, r: r_angle, small: true })
             .angle({ p1: K, p: A, p2: B, r: r_angle })
             .angle({ p1: B2, p: A, p2: K2, r: r_angle })
@@ -88,16 +89,16 @@
 
         interactor
             .init((e) => {  // create coupler curve
-                const w0 = crank.ang;
+                const A1_0 = [A.x, A.y];
+
                 for (let w = 0; w <= 2 * Math.PI + 3 * Math.PI / 90; w += Math.PI / 180) {
                     A.x = Math.cos(w) * 67.9;
                     A.y = Math.sin(w) * 67.9;
-                    //  crank.ang = w0 + w;
                     c.correct();
                     KK.push({ x: K.x, y: K.y });
                     KK2.push({ x: K2.x, y: K2.y });
                 }
-                crank.ang = w0;
+                A.x = A1_0[0]; A.y = A1_0[1]; console.log(A);
             })
             .on('tick', (e) => {
                 const itr = c.correct();
@@ -121,7 +122,7 @@
             console.log(`K: x:${K.x} y:${K.y} `);
             console.log(`K2: x:${K2.x} y:${K2.y} `);
 
-        }; //document.getElementById("btn").onclick = click();
+        }; 
     </script>
 
 </body>

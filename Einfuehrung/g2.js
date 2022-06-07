@@ -1175,49 +1175,6 @@ g2.prototype.rec.prototype = g2.mixin(g2.ifc.label, g2.ifc.hatch, {
 })
 
 /**
- * `ply` command prototype
- */
- g2.prototype.ply.prototype = g2.mixin(g2.ifc.label, {
-    pointAt(loc) {
-        const {w,x,y} = this;
-        const pts = (w || x || y) ? g2.poly.proxy.trf(this.pts,{w,x,y}) : this.pts;
-        if ((loc + 0 === loc)) // numerical parameter location on polygon [0..1].
-            return g2.poly.pointAt(loc,pts,this.closed)
-    }
-})
-/**
- * Find point on polygon at parameter `mu` in [0..1].
- * s. poly2.js
- * @param {number} mu - Parameter [0..1].
- * @param {array} poly - Polygon.
- * @param {boolean} [closed = false] .
- * @returns {object} point at parameter.
- */
- g2.poly.pointAt = g2.poly.pointAt || function(mu,poly,closed) {
-    const n = poly.length;
-    let   L = 0, p1, p2 = poly[n-1], lseg, lsum = 0, museg;
-
-    mu = Math.min(Math.max(mu,0),1);
-    for (let i=0; i<n; i++) {
-        p1 = p2;
-        p2 = poly[i];
-        if (i > 0 || closed)
-            L += Math.hypot(p2.x-p1.x,p2.y-p1.y);
-    }
-    p1 = poly[0];
-    for (let i=1; i<=n; i++) {
-        p2 = poly[i%n];
-        lseg = Math.hypot(p2.x-p1.x,p2.y-p1.y);
-        if ((lsum + lseg) >= mu*L) {
-            museg = (mu*L - lsum)/lseg;
-            return {x:p1.x + museg*(p2.x-p1.x), y:p1.y + museg*(p2.y-p1.y), nx: (p2.y-p1.y)/lseg, ny:-(p2.x-p1.x)/lseg };
-        }
-        lsum += lseg;
-        p1 = p2;
-    }
-}
-
-/**
 * Draw interactive handle.
 * @method
 * @returns {object} g2

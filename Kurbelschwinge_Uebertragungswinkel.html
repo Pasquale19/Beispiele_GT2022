@@ -34,12 +34,12 @@
         const g = g2().clr()                           // important with 'interaction'
             .view(interactor.view)           // view sharing ... !
             .ply({ pts: [A0, A, B, B0], lw: 2, ls: 'darkslategray' })
-            .lin({ p1: A, p2: B, label: { str: "@len;mm" } })
+            .lin({ p1: A, p2: B })
             .gnd(A0)
             .hdl(A)
             .hdl(B)
             .gnd(B0)
-            .angle({ p: B, p1: A, p2: B0, side: 1, label: { str: "\u00B5: ;@angle;°" } }) //https://www.htmlsymbols.xyz/greek-symbols
+            .angle({ p1: A, p: B, p2: B0, anz: 1, ls: "green", r: 50, small: true, label: { str: "\u03BC: @angle;°" } }) //https://www.htmlsymbols.xyz/greek-symbols
         g.exe(ctx);
 
         let itrmax = 0;
