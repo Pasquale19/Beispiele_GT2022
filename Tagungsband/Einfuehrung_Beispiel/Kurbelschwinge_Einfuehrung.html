@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Titel des Dokuments</title>
+</head>
+
+
+<body>
+    <canvas id="c" width="900" height="800"></canvas>
+    <!--Zeichenfläche-->
+    <script src="./g2.js"></script>
+    <!--Verweis auf Grafikbibliothek-->
+    <script src="./cstr.js"></script>
+    <!--Verweis auf Constraintbibliothek-->
+    <script>
+        //Zugriff auf canvas-Element    
+        const ctx = document.getElementById('c').getContext('2d');
+        //Interaktionsobjekt erstellen
+        const interactor = canvasInteractor.create(ctx, { x: 140, y: 140, cartesian: true });
+        // Selektionsobjekt
+        const selector = g2.selectorHdl(interactor.evt);
+
+
+        //Definition der Nodes
+        const A0 = { x: 0, y: 0, base: true, label: 'A0' },
+            A = { x: 0, y: 50, m: 2, label: 'A' },
+            B = { x: 180, y: 110, label: 'B' },
+            B0 = { x: 200, y: 10, base: true, label: 'B0' },
+            K = { x: 90, y: 120, label: "K" };
+
+
+        //Definition der Constraints
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
+            .n2({ n1: A, n2: B, len: 'const' })
+            .n2({ n1: B0, n2: B, len: 'const' })
+            .n2({ n1: A, n2: K, len: 'const' })
+            .n2({ n1: B, n2: K, len: 'const' })
+        //.n3({ n1: A, n2: B, n3: K, ori: 'const' }) //Alternative funktioniert nicht
+
+        //Zeichnen des Getriebe
+        const g = g2().clr()
+            .view(interactor.view)
+            .lin({ p1: A0, p2: A, lw: 2 }) //Linie
+            .lin({ p1: B0, p2: B, lw: 2 })
+            .ply({ pts: [A, B, K], lw: 2, ls: 'darkslategray', closed: true }) //Polygon
+            .gnd(A0) //Symbol für gestellfesten Node
+            .gnd(B0)
+            .hdl(A) //"Handle" - Symbol
+            .nod(B)
+            .nod(K) //"Node" Symbol            
+        g.exe(ctx);
+
+
+        //Definition der Interaktions- und Animationsmethoden
+        interactor
+            .on('tick', (e) => {
+                const itr = c.correct();
+                g.exe(selector).exe(ctx);
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag) {
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+                }
+            })
+            .startTimer();
+    </script>
+</body>
+
+</html>
