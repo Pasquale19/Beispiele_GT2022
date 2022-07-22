@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Seitenhalbierende</title>
+</head>
+
+<body>
+    <h1 style="text-align:center;width:98vw">Seitenhalbierende</h1>
+    <pre id="out">?</pre>
+    <button onclick="c.correct();g.exe(ctx);c.log()">correct</button><br>
+    <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:transparent"></canvas><br>
+    <span id="out"></span>
+    <script src="./../lib/g2-ng/g2.js"></script>
+    <script src="./../lib/cstr2/cstr.js"></script>
+    <script>
+        const ctx = document.getElementById('c').getContext('2d');
+        const interactor = canvasInteractor.create(ctx, { x: 100, y: 20, cartesian: true });
+        const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+
+        const e = 60;
+        const A = { x: 100, y: 100, m: 20, label: "A", lbloc: "w" };
+        const B = { x: 300, y: 100, m: 20, label: "B", lbloc: "e" };
+        const C = { x: 200, y: 250, m: 20, label: "C", lbloc: "n" };
+        const M = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2, m: 1, label: "M", lbloc: "s", r: 3 }
+
+
+        const g = g2().clr()
+            //.grid()                               // important with 'interaction'
+            .view(interactor.view)               // important also !
+            .ply({ pts: [A, B, C], fs: "lightyellow", lw: 3, ls: "black", closed: "true" })
+            .ply({ pts: [A, M, C], ld: [3, 3] })
+            .nod(M)
+            .hdl(A).hdl(B).hdl(C)
+            //.cir({ p: M, get r() { return Math.hypot(M.x - A.x, M.y - A.y) } })
+            ;
+
+
+        const c = cstr()
+            .n2({ id: 'AB', n1: A, n2: B })
+            .n2({ id: 'BC', n1: B, n2: C })
+            .n2({ id: "CA", n1: C, n2: A })
+            .n2({ id: "AM", n1: A, n2: M, get len() { return Math.hypot(A.x - B.x, A.y - B.y) / 2; } })
+            .n3({ n1: A, n2: B, n3: M, ang: 0 })
+            .n3({ n1: M, n2: A, n3: C, ang: Math.PI / 2 })
+
+
+        let itrpeak = 0;
+        interactor
+            .on('tick', (e) => {
+                const itr = c.correct();
+                document.getElementById('out').innerHTML = `max/itr= ${itrpeak = Math.max(itr, itrpeak)} / ${itr}`;
+                g.exe(selector).exe(ctx);
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag) {
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+                }
+            })
+            .startTimer();
+
+    </script>
+</body>
