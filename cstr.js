@@ -64,7 +64,7 @@ cstr.prototype = {
      * @param {string} - id.
      * @returns {object} cstr
      */
-     byId(id) {
+    byId(id) {
         return this.constraints.find(c => c.a.id === id).a;
     },
     correct() {
@@ -109,6 +109,15 @@ cstr.prototype.n2.prototype = {
             this.len = Math.hypot(this.n2.y-this.n1.y, this.n2.x-this.n1.x);
         if (this.ang === 'const') 
             this.ang = Math.atan2(this.n2.y-this.n1.y, this.n2.x-this.n1.x);
+        else if (typeof this.ang === 'number') {  // explicit angle given [rad] ...
+            const cang = Math.cos(this.ang), sang = Math.sin(this.ang); 
+            const x12 = this.n2.x-this.n1.x, y12 = this.n2.y-this.n1.y;
+            const r = Math.hypot(x12, y12);
+            const cx = this.n1.x + this.mc_m1*x12, cy = this.n1.y + this.mc_m1*y12;  // rotation center ...
+
+            this.n1.x = cx - this.mc_m1*r*cang; this.n1.y = cy - this.mc_m1*r*sang;
+            this.n2.x = cx + this.mc_m2*r*cang; this.n2.y = cy + this.mc_m2*r*sang;
+        }
     },
 
     get r() {

@@ -4,14 +4,18 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Titel des Dokuments</title>
+    <title>Kurbelschwinge n3</title>
 </head>
 
 
 <body>
-    <canvas id="c" width="601" height="401"></canvas><!--Zeichenfläche-->
-    <script src="./g2.js"></script>    <!--Verweis auf Grafikbibliothek-->
-    <script src="./cstr.js"></script>    <!--Verweis auf Constraintbibliothek-->
+    <h1 style="text-align:center;width:98vw">Kurbelschwinge n3</h1>
+    <pre id="out">?</pre>
+    <button onclick="c.correct();g.exe(ctx);c.log()">correct</button><br>
+    <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:transparent"></canvas><br>
+    <span id="out"></span>
+    <script src="./../lib/g2-ng/g2.js"></script>
+    <script src="./../lib/cstr2/cstr.js"></script>
     <script>
         //Zugriff auf canvas-Element    
         const ctx = document.getElementById('c').getContext('2d');
@@ -30,13 +34,13 @@
 
 
         //Definition der Constraints
-        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const',ang:'const' })
             .n2({ n1: A, n2: B, len: 'const' })
             .n2({ n1: B0, n2: B, len: 'const' })
             .n2({ n1: A, n2: K, len: 'const' })
-            .n2({ n1: B, n2: K, len: 'const' })
-        //.n3({ n1: A, n2: B, n3: K, ori: 'const' }) //Alternative funktioniert nicht
-
+            //.n2({ n1: B, n2: K, len: 'const' })
+            .n3({ n1: A, n2: B, n3: K, ori: 'const' }) //Alternative funktioniert nicht
+        const crank = c.byId('A0A');
         //Zeichnen des Getriebe
         const g = g2().clr()
             .view(interactor.view)
@@ -50,12 +54,16 @@
             .nod(K) //"Node" Symbol            
         g.exe(ctx);
 
-
+        let itr=0, itrmax=0;
         //Definition der Interaktions- und Animationsmethoden
         interactor
             .on('tick', (e) => {
+                crank.ang += Math.PI / 180;                
                 const itr = c.correct();
-                g.exe(selector).exe(ctx);
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrmax = Math.max(itr, itrmax)} / ${itr}`;
+                g.exe(ctx);
+                if (crank.ang >= 130 * Math.PI / 2)
+                    interactor.endTimer();
             })
             .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
             .on('drag', (e) => {

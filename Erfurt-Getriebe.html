@@ -9,7 +9,7 @@
 
 <body>
     <pre id="out">?</pre>
-    <canvas id="c" width="901" height="761" style="border:1px solid black;background-color:transparent;"></canvas><br>
+    <canvas id="c" width="901" height="1100" style="border:1px solid black;background-color:transparent;"></canvas><br>
     <script src="./lib/g2-ng/g2.js"></script>
     <script src="./lib/cstr2/cstr.js"></script>
     <script src="./../g2Extension/g2Extension/src/g2ExtraSymbols.js"></script>
@@ -97,6 +97,11 @@
                 g.exe(selector).exe(ctx);
             })
             .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('wheel',  (e) => {   // zooming about pointer location ...
+            interactor.view.x = e.x + e.dscl*(interactor.view.x - e.x);
+            interactor.view.y = e.y + e.dscl*(interactor.view.y - e.y);
+            interactor.view.scl *= e.dscl;
+        })
             .on('drag', (e) => {
                 if (selector.selection && selector.selection.drag) {
                     selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
