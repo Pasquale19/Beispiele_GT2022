@@ -10,7 +10,7 @@
 <body>
     <h1 style="text-align:center;width:98vw">Drehzahlplan nach Kutzbach</h1>
     <pre id="out">?</pre>
-    <canvas id="c" width="1201" height="801" style="border:1px solid black;background-color:transparent;"></canvas><br>
+    <canvas id="c" width="1301" height="901" style="border:1px solid black;background-color:transparent;"></canvas><br>
     <span id="out"></span>
     <script src="./../lib/g2-ng/g2.js"></script>
     <script src="./../lib/g2-ng/g2.lib.js"></script>
@@ -21,13 +21,13 @@
     <button id="btn" onclick=clicked()>Debug</button>
     <script>
         const ctx = document.getElementById('c').getContext('2d');
-        const interactor = canvasInteractor.create(ctx, { x: 800, y: 290, cartesian: true });
+        const interactor = canvasInteractor.create(ctx, { x: 800, y: 390, cartesian: true });
         const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
         const r_P=0.1;
        
         const O = { x: 0, y: 0, base: true, label: { str: 'O', loc: 'sw' } },//Nullpunkt
             A = { x: 0, y: 0, label: { str: 'A', loc: 'nw' }, m: 2 },
-            P12 = { x: 155, y: 0, label: { str: '12=15=25', loc: 'e' },r:r_P, base:"true"},
+            P12 = { x: 370, y: 0, label: { str: '12=15=25', loc:'e'},r:r_P, base:"true"},
             P23 = { x: P12.x, y: 111, label: { str: '23', loc: 'e' },r:r_P , base:"true"},
             P35 = { x: P12.x, y: 167, label: { str: '35', loc: 'e' },r:r_P , base:"true"},
             P34 = { x: P12.x, y: 224, label: { str: '34', loc: 'e' },r:r_P , base:"true"},
@@ -36,13 +36,13 @@
             S35 = { x: 51, y: P35.y },
             //Ablesegerade
             AO= { x: 0, y: -108 ,base:true,label:"AO"},
-            n21= { x: -106, y: AO.y, label:{str:"n21",loc:"s"} },
-            n51= { x: -36, y: AO.y , label:{str:"n51",loc:"s"}},
-            n31= { x: 100, y: AO.y, label:{str:"n31",loc:"s"} }
+            n21= { x: -106, y: AO.y, label:{str:"n21",loc:"sw"} },
+            n51= { x: -36, y: AO.y , label:{str:"n51",loc:"sw"}},
+            n31= { x: 100, y: AO.y, label:{str:"n31",loc:"sw"} }
             //Vektoren
-            AO2= { x: O.x, y: -162 ,base:true},
-            AO3= { x: O.x, y: -189 ,base:true},
-            AO5= { x: O.x, y: -142 ,base:true},
+            AO2= { x: O.x, y: -240 ,base:true},
+            AO3= { x: O.x, y: -190 ,base:true},
+            AO5= { x: O.x, y: -150 ,base:true},
             V2= { x: n21.x, y: AO2.y ,label:"V2"},
             V5= { x: n51.x, y: AO5.y ,label:"V5"},
             V3= { x: n31.x, y: AO2.y ,label:"V3"},
@@ -73,8 +73,10 @@
                 .n2({  n1: AO5, n2: V5,ang:0})
                 .n2({  n1: AO5, n2: V5, get len() { return Math.abs(n51.x); }})
                 .n2({  n1: AO3, n2: V3P,ang:0})
+                .n2({  n1: V3, n2: V3P,ang:-Math.PI/2})
+                .n2({  n1: V2, n2: V3N,ang:-Math.PI/2})
                
-               .n2({ id:"v" , n1: V3P, n2: V3N, get len() { return Math.abs(-n51.x+n31.x); }})
+               //.n2({ id:"v" , n1: V3P, n2: V3N, get len() { return Math.abs(-n51.x+n31.x); }})
                .n2({ id:"vec" , n1: V3P, n2: V3N, ang:0})
             ;
 
@@ -84,12 +86,12 @@
 
         const g = g2().clr()                           // important with 'interaction'
             .view(interactor.view)           // view sharing ... !
-            .img({uri:"./Drehzahlplan_Kutzbach.svg",x:-742,y:-208-37})            
+            .img({uri:"./Drehzahlplan_Kutzbach.svg",x:-742-185,y:-208-33-235})            
             .gnd(O).gnd(AO).hdl(A)
             .nod(P23).nod(P35).nod(P34).nod(P12)
             .hdl(S23).hdl(S35).gnd(S34)
             .hdl(n21).hdl(n51).hdl(n31)
-            //
+            
             .lin({ p1: AO, x2:AO.x,y2:S34.y, ls: "black", lw: 1 })//Nullgerade
             .lin({ p1: S23, p2: S34, ls: col_3, lw: 3 })
             .lin({ p1: n51, p2: S35, ls: col_5, lw: 3 })
@@ -97,11 +99,15 @@
             .lin({ p1: O, p2: n31, ls: col_2, lw: 3 })
             //Vektoren
             .nod(V2).nod(V3).nod(V5).nod(V3P).nod(V3N)
-            .vec({ p1: AO2, p2: V2, ls: col_2, lw: 2,label:{str:"n21: @len",loc:"s"} })
-            .vec({ p1: AO2, p2: V3, ls: col_3, lw: 2,label:{str:"n31: @len",loc:"s"} })
+            .vec({ p1: AO2, p2: V2, ls: col_2, lw: 2,label:{str:"n21: @len",loc:"mid"} })
+            .vec({ p1: AO2, p2: V3, ls: col_3, lw: 2,label:{str:"n31: @len",loc:"mid", off:-0.5} })
             .vec({ p1: AO5, p2: V5, ls: col_5, lw: 2,label:{str:"n51: @len",loc:"left"} })
             .nod(V3P).nod(V3N)
-            .vec({ p1: V3P, p2: V3N, ls: "blue", lw: 2,label:{str:"n35: @len",loc:"-0.5"} })
+            .vec({ p1: V3P, p2: V3N, ls: "blue", lw: 2,label:{str:"n35: @len",loc:"mid"} })
+            //Linien
+            .lin({ p1: n51, p2: V5 })
+            .lin({ p1: n21, p2: V2 })
+            .lin({ p1: n31, p2: V3 })
 
         g.exe(ctx);
 
