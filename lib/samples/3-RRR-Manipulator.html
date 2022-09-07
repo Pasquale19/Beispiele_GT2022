@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Crank</title>
+</head>
+
+<body>
+    <h1>Crank</h1>
+    <pre id="out">?</pre>
+    <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:#eee;"></canvas><br>
+<script src="../g2.js"></script>
+<script src="../cstr.js"></script>
+<script>
+
+const ctx = document.getElementById('c').getContext('2d');
+const interactor = canvasInteractor.create(ctx, {x:300,y:100,scl:1,cartesian:true});
+const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+
+const e = 40;
+const A0= {x:-140,y:0,base:true,label:'A0'};
+const A1= {x:-180,y:80,label:'A1'};
+const A = {x: -60,y:80,label:'A'};
+const B0= {x: 140,y:0,base:true,label:'B0'};
+const B1= {x: 180,y:80,label:'B1'};
+const B = {x:  60,y:80,label:'B'};
+const C0= {x:   0,y:280,base:true,label:'C0'};
+const C1= {x: 120,y:180,label:'C1'};
+const C = {x:   0,y:180,label:'C'};
+
+const g = g2().clr()                           // important with 'interaction'
+              .view(interactor.view)           // view sharing ... !
+              .grid()
+              .ply({pts:[A,B,C],closed:true,ls:'navy',fs:'#cccc',lw:3})
+              .ply({pts:[A0,A1,A],ls:'navy',lw:3})
+              .ply({pts:[B0,B1,B],ls:'navy',lw:3})
+              .ply({pts:[C0,C1,C],ls:'navy',lw:3})
+              .gnd(A0).gnd(B0).gnd(C0)
+              .hdl(A1).hdl(B1).hdl(C1)
+              .hdl(A).hdl(B).hdl(C)
+
+const c = cstr().n2({n1:A,n2:B,len:'const'})
+                .n2({n1:B,n2:C,len:'const'})
+                .n2({n1:C,n2:A,len:'const'})
+                .n2({n1:A0,n2:A1,len:80})
+                .n2({n1:B0,n2:B1,len:80})
+                .n2({n1:C0,n2:C1,len:80})
+                .n2({n1:A,n2:A1,len:'const'})
+                .n2({n1:B,n2:B1,len:'const'})
+                .n2({n1:C,n2:C1,len:'const'})
+
+interactor
+    .on('tick', (e) => {
+            document.getElementById('out').innerHTML = 'itr=' + c.correct();
+            g.exe(selector).exe(ctx); 
+        })
+    .on('pan',  (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+    .on('drag', (e) => { 
+            if (selector.selection && selector.selection.drag) {
+                selector.selection.drag({x:e.xusr,y:e.yusr,dx:e.dxusr,dy:e.dyusr,mode:'drag'});
+        }
+    })
+    .startTimer();
+</script>
+</body>
+</html>

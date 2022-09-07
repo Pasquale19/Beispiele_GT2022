@@ -12,10 +12,10 @@
     <pre id="out">?</pre>
     <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:transparent;"></canvas><br>
     <span id="out"></span>
-    <script src="./../g2-ng/g2.js"></script>
-    <script src="./../cstr2/cstr.js"></script>
-    <script src="./../g2Extension/g2Extension/src/g2ExtraSymbols.js"></script>
-    <script src="./../g2Extension/g2Extension/src/g2ExtraCommands.js"></script>
+    <script src="./lib/g2.js"></script>
+    <script src="./lib/cstr.js"></script>
+    <script src="./lib/g2Extension/g2ExtraSymbols.js"></script>
+    <script src="./lib/g2Extension/g2ExtraCommands.js"></script>
     <script>
         const ctx = document.getElementById('c').getContext('2d');
         const interactor = canvasInteractor.create(ctx, { x: 140, y: 140, cartesian: true });

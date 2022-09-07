@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>4 nodes</title>
+</head>
+
+<body>
+    <h1>4 nodes</h1>
+    <pre id="out">?</pre>
+    <canvas id="c" width="201" height="101" style="border:1px solid black;background-color:#eee;"></canvas><br>
+<script src="../../g2-ng/g2.js"></script>
+<script src="../cstr.js"></script>
+<script>
+
+const ctx = document.getElementById('c').getContext('2d');
+const interactor = canvasInteractor.create(ctx, {x:20,y:10,scl:1,cartesian:true});
+const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+
+const pi = Math.PI;
+const A = {x:40,y:20,label:'A',lbloc:'sw'};
+const B = {x:100,y:40,label:'B',lbloc:'n'};
+const C = {x:160,y:40,label:'C'};
+const D = {x:0,y:40,label:'D',lbloc:'s'};
+const E = {x:40,y:40,label:'E',r:1,lbloc:'nw'};
+const F = {x:80,y:0,label:'F',r:1,lbloc:'se'};
+
+const c = cstr().n2({id:'EC',n1:E,n2:C,len:'const'})
+                .n2({id:'DF',n1:D,n2:F,len:'const'})
+                .n2({n1:E,n2:A,len:'const',ang:cstr.ang.from('EC',pi/2)})
+                .n2({n1:F,n2:B,len:'const',ang:cstr.ang.from('DF',pi/2)})
+                .n2({n1:C,n2:B,ang:cstr.ang.from('EC')})
+                .n2({n1:D,n2:A,ang:cstr.ang.from('DF')})
+
+const g = g2().clr()                           // important with 'interaction'
+              .view(interactor.view)           // view sharing ... !
+              .grid()
+              .ply({pts:[A,E,C],ls:'navy',lw:3})
+              .ply({pts:[B,F,D],ls:'navy',lw:3})
+              .box({p:B,w:()=>c.byId('EC').w,b:30,h:15,fs:'#cccc'})
+              .box({p:A,w:()=>c.byId('DF').w,b:30,h:15,fs:'#cccc'})
+              .hdl(A)
+              .hdl(B)
+              .hdl(C)
+              .hdl(D)
+              .cir(E)
+              .cir(F)
+//              .txt({x:-80,y:38,str:()=>'F='+c.dof})
+
+console.log(c.dof);
+
+interactor
+    .on('tick', (e) => {
+            g.exe(selector).exe(ctx); 
+        })
+    .on('drag', (e) => { 
+        if (selector.selection && selector.selection.drag) {
+           selector.selection.drag({x:e.xusr,y:e.yusr,dx:e.dxusr,dy:e.dyusr,mode:'drag'});
+           document.getElementById('out').innerHTML = 'itr=' + c.correct();
+        }
+    })
+    .startTimer();
+</script>
+</body>
+</html>

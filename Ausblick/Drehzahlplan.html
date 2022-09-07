@@ -12,12 +12,11 @@
     <pre id="out">?</pre>
     <canvas id="c" width="1301" height="901" style="border:1px solid black;background-color:transparent;"></canvas><br>
     <span id="out"></span>
-    <script src="./../lib/g2-ng/g2.js"></script>
-    <script src="./../lib/g2-ng/g2.lib.js"></script>
-    <script src="./../lib/cstr2/cstr.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/goessner/v2/v2.min.js"></script>
-    <script src="./../../g2Extension/g2Extension/src/g2ExtraSymbols.js"></script>
-    <script src="./../../g2Extension/g2Extension/src/g2ExtraCommands.js"></script>
+    <script src="./../lib/g2.js"></script>
+   
+   <!-- <script src="./../lib/g2-ng/g2.lib.js"></script>-->
+    <script src="./../lib/cstr.js"></script>
+
     <button id="btn" onclick=clicked()>Debug</button>
     <script>
         const ctx = document.getElementById('c').getContext('2d');
@@ -47,8 +46,7 @@
             V5= { x: n51.x, y: AO5.y ,label:"V5"},
             V3= { x: n31.x, y: AO2.y ,label:"V3"},
             V3P= { x: n31.x, y: AO3.y ,label:"V3P"},
-            V3N= { x: n51.x, y: AO3.y ,label:"V3N"}
-            
+            V3N= { x: n51.x, y: AO3.y ,label:"V3N"}         
             ;
            
         const c = cstr().n2({ id: 'A0A', n1: O, n2: A})           
@@ -86,28 +84,29 @@
 
         const g = g2().clr()                           // important with 'interaction'
             .view(interactor.view)           // view sharing ... !
-            .img({uri:"./Drehzahlplan_Kutzbach.svg",x:-742-185,y:-208-33-235})            
-            .gnd(O).gnd(AO).hdl(A)
-            .nod(P23).nod(P35).nod(P34).nod(P12)
-            .hdl(S23).hdl(S35).gnd(S34)
-            .hdl(n21).hdl(n51).hdl(n31)
-            
-            .lin({ p1: AO, x2:AO.x,y2:S34.y, ls: "black", lw: 1 })//Nullgerade
-            .lin({ p1: S23, p2: S34, ls: col_3, lw: 3 })
-            .lin({ p1: n51, p2: S35, ls: col_5, lw: 3 })
-            .lin({ p1: n21, p2: S23, ls: col_2, lw: 3 })
-            .lin({ p1: O, p2: n31, ls: col_2, lw: 3 })
-            //Vektoren
-            .nod(V2).nod(V3).nod(V5).nod(V3P).nod(V3N)
-            .vec({ p1: AO2, p2: V2, ls: col_2, lw: 2,label:{str:"n21: @len",loc:"mid"} })
-            .vec({ p1: AO2, p2: V3, ls: col_3, lw: 2,label:{str:"n31: @len",loc:"mid", off:-0.5} })
-            .vec({ p1: AO5, p2: V5, ls: col_5, lw: 2,label:{str:"n51: @len",loc:"left"} })
-            .nod(V3P).nod(V3N)
-            .vec({ p1: V3P, p2: V3N, ls: "blue", lw: 2,label:{str:"n35: @len",loc:"mid"} })
+            .img({uri:"./Drehzahlplan_Kutzbach.svg",x:-742-185,y:-208-33-235}) 
             //Linien
             .lin({ p1: n51, p2: V5 })
             .lin({ p1: n21, p2: V2 })
             .lin({ p1: n31, p2: V3 })
+            .lin({ p1: AO, x2:AO.x,y2:S34.y, ls: "black", lw: 1 })//Nullgerade
+            .lin({ p1: S23, p2: S34, ls: col_3, lw: 3 })
+            .lin({ p1: n51, p2: S35, ls: col_5, lw: 3 })
+            .lin({ p1: n21, p2: S23, ls: col_2, lw: 3 })
+            .lin({ p1: O, p2: n31, ls: col_2, lw: 3 })           
+            //.gnd(O)
+            .gnd(AO).hdl(A)
+            .nod(P23).nod(P35).nod(P34).nod(P12)
+            .hdl(S23).hdl(S35).gnd(S34)
+            .hdl(n21).hdl(n51).hdl(n31)
+            
+            //Vektoren            
+            .vec({ p1: AO2, p2: V2, ls: col_2, lw: 2,label:{str:"n21: @len",loc:"mid"} })
+            .vec({ p1: AO2, p2: V3, ls: col_3, lw: 2,label:{str:"n31: @len",loc:"mid", off:-0.5} })
+            .vec({ p1: AO5, p2: V5, ls: col_5, lw: 2,label:{str:"n51: @len",loc:"left"} })
+            
+            .vec({ p1: V3P, p2: V3N, ls: "blue", lw: 2,label:{str:"n35: @len",loc:"mid"} })
+            .nod(V3P).nod(V3N).nod(V2).nod(V3).nod(V5).nod(V3P).nod(V3N)
 
         g.exe(ctx);
 

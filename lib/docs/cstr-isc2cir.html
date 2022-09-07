@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>4 nodes</title>
+</head>
+
+<body>
+    <h1>4 nodes</h1>
+    <pre id="out">?</pre>
+    <canvas id="c" width="201" height="101" style="border:1px solid black;background-color:#eee;"></canvas><br>
+<script src="../../g2-ng/g2.js"></script>
+<script src="../cstr.js"></script>
+<script>
+
+const ctx = document.getElementById('c').getContext('2d');
+const interactor = canvasInteractor.create(ctx, {x:100,y:30,scl:1,cartesian:true});
+const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+
+const pi = Math.PI, hypot = Math.hypot;
+const A = {x:0,y:20,base:true,label:'A',lbloc:'s'};
+const B = {x:-40,y:0,base:true,label:'B'};
+const C = {x:-40,y:20,label:'C'};
+const D = {x:-20,y:-20,label:'D'};
+const c1 = {p:A,r:40,lw:2,ls:'gray',fs:'#ccc6'};
+const c2 = {p:B,r:25,lw:2,ls:'gray',fs:'#ccc6'};
+
+const c = cstr().n2({id:'AB',n1:A,n2:B})
+                .n2({n1:A,n2:C,len:c1.r,ang:cstr.ang.negFrom('AB')})
+                .n2({n1:A,n2:D,len:c1.r,ang:cstr.ang.posFrom('AB')})
+                .n2({n1:B,n2:C,len:c2.r,ang:cstr.ang.negFrom('AB')})
+                .n2({n1:B,n2:D,len:c2.r,ang:cstr.ang.posFrom('AB')})
+
+const g = g2().clr()                           // important with 'interaction'
+              .view(interactor.view)           // view sharing ... !
+              .grid()
+              .cir(c1)
+              .cir(c2)
+              .hdl(A)
+              .hdl(B)
+              .nod(C)
+              .nod(D)
+//              .txt({x:-80,y:38,str:()=>'F='+c.dof})
+
+console.log(c.dof);
+
+interactor
+    .init(() => c.correct())
+    .on('tick', (e) => {
+            g.exe(selector).exe(ctx); 
+        })
+    .on('drag', (e) => { 
+        if (selector.selection && selector.selection.drag) {
+           selector.selection.drag({x:e.xusr,y:e.yusr,dx:e.dxusr,dy:e.dyusr,mode:'drag'});
+           document.getElementById('out').innerHTML = 'itr=' + c.correct();
+        }
+    })
+    .startTimer();
+</script>
+</body>
+</html>

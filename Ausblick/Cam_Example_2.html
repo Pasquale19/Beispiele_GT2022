@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cam-Example</title>
+</head>
+
+<body>
+    <h1>Cam-Example</h1>
+    <pre id="out">?</pre>
+    <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:transparent;"></canvas><br>
+    <script src="./../lib/g2.js"></script>
+    <script src="./../lib/cstr.js"></script>
+    <script src="./../lib/g2Extension/g2ExtraSymbols.js"></script>
+    <script scr="./../lib/g2Extension/g2ExtraCommands.js"></script>
+    <script>
+
+
+
+        const ctx = document.getElementById('c').getContext('2d');
+        const interactor = canvasInteractor.create(ctx, { x: 200, y: 150, scl: 1, cartesian: true });
+        const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+
+        const pi = Math.PI, max = Math.max, min = Math.min, hypot = Math.hypot;
+        const e = 40; // unit vector
+        //Kurvenscheibe
+        let t=0;
+        function r_cam() {            return 2 * e + Math.sin(t) * e;        }
+        const beg_a= { 
+            w:0
+        };
+
+        //Nodes
+        const A0 = { x: 0, y: 0, base: true, label: { str: "A\u2080", loc: "sw" } };
+        const A = { x: 1 * e, y: 0, m: 1, label: { str: "A", loc: "n" } };
+        const H1 = { x: A0.x + e, y: A0.y, base: true, label: { str: "A", loc: "n" } };
+        const B0 = { x: A0.x, y: 4 * e, w: pi / 2, base: true, label: { str: "B0", loc: "w" } };
+        const B = { x: B0.x, y: B0.y -2* e, w: pi / 2, m: 1, label: { str: "B", loc: "w" } };
+
+        //Hilfsgrößen
+        const L = hypot(A.x, A.y) + hypot(B.x, B.y);
+        const KK = []
+        for (t = 0; t < 2*pi; t+=pi/45) {
+            let angle = t * 2 * pi / 360;
+            KK.push([Math.sin(t) * r_cam(t), Math.cos(t) * r_cam(t)]);
+        }
+
+
+        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: "const", ang: "const" })
+            .n2({ id: 'B0B', n1: B0, n2: B, ang: "const" })
+            .n2({ id: 'A0B', n1: A0, n2: B, len:r_cam } )
+        const crank = c.byId('A0A');
+        
+
+        const g = g2().clr()                           // important with 'interaction'
+            .view(interactor.view)           // view sharing ... !
+            //.grid()
+            .lin({ p1: B, p2: A0, ls: 'navy', lw: 1, label: "@len" })
+            .lin({ p1: A, p2: A0, ls: 'navy', lw: 3 })
+            .lin({ p1: A0, p2: B0, ls: 'navy', lw: 1,ld:[4,4] })
+            .beg(beg_a)
+                .ply({ pts: KK, ls: 'green', lw: 2, w: 0,closed:true })
+            .end()
+            .gnd(A0)
+            .gnd(B0)
+            .hdl(A)
+            .nodflt(B)
+            //.angle({ p: A0, p1: H1, p2: A, ls: "green", label: "@angle;°", r: 50 }) //not perfomant
+        //.txt({str:`L=${Math.round(L)}`,x: 2*e,y:-1.4*e,ls:"navy"})
+
+
+
+
+        g.exe(ctx);
+
+        interactor
+            .on('tick', (e) => {
+                console.log(crank.ang);
+
+                crank.ang = (crank.ang + Math.PI / 180) % (2 * Math.PI);
+                t=crank.ang;
+                const itr = c.correct();
+                let itrpeak = 0;
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrpeak = Math.max(itr, itrpeak)} / ${itr} \t\t Dof: ${c.dof}`;
+                beg_a.w+= Math.PI / 180;
+                g.exe(ctx);
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag) {
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+                }
+            })
+            .startTimer();
+    </script>
+</body>
+
+</html>

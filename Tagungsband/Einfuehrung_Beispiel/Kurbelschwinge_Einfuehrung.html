@@ -9,15 +9,20 @@
 
 
 <body>
-    <canvas id="c" width="601" height="401"></canvas><!--Grafikelement-->
-    <script src="./g2.js"></script>    <!--Verweis auf Grafikbibliothek-->
-    <script src="./cstr.js"></script>    <!--Verweis auf Constraintbibliothek-->
+    <canvas id="c" width="601" height="401"></canvas>
+    <!--Grafikelement-->
+    <script src="./g2.js"></script>
+    <!--Verweis auf Grafikbibliothek-->
+    <script src="./cstr.js"></script>
+    <!--Verweis auf Constraintbibliothek-->
     <script>
         //Zugriff auf canvas-Element    
         const ctx = document.getElementById('c').getContext('2d');
         //Interaktionsobjekt erstellen
-        const interactor = canvasInteractor.create(ctx, { x: 140, y: 140,
-            cartesian: true });
+        const interactor = canvasInteractor.create(ctx, {
+            x: 140, y: 140,
+            cartesian: true
+        });
         // Selektionsobjekt
         const selector = g2.selectorHdl(interactor.evt);
 
@@ -25,44 +30,47 @@
         const A0 = { x: 0, y: 0, base: true, label: 'A0' },
             A = { x: 0, y: 50, m: 2, label: 'A' },
             B = { x: 180, y: 110, label: 'B' },
-            B0 = { x: 200, y: 10, base: true, label: 'B0' };         
+            B0 = { x: 200, y: 10, base: true, label: 'B0' };
 
         //Definition der Constraints
         const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
             .n2({ n1: A, n2: B, len: 'const' })
-            .n2({ n1: B0, n2: B, len: 'const' });  
+            .n2({ n1: B0, n2: B, len: 'const' });
 
-            
-        
+
+
         //Zeichnen des Getriebe
         const g = g2().clr()
-            .view(interactor.view)            
-            .ply({ pts: [A0, A, B,B0], lw: 2}) //Polylinie
+            .view(interactor.view)
+            .ply({ pts: [A0, A, B, B0], lw: 2 }) //Polylinie
             .gnd(A0) //Symbol für gestellfesten Node
             .gnd(B0)
             .hdl(A) //"Handle" - Symbol
             .nod(B)//"Node" - Symbol                         
-        g.exe(ctx);      
+        g.exe(ctx);
 
         //Extra
-        const K = { x: 90, y: 120, label: "K" };
-        c.n2({ n1: A, n2: K, len: 'const' })
-         .n3({ n1: B, n2: A,n3:K, ang:'const' });
-        g.ply({pts: [A,K,B],closed:true,lw:2}).nod(K);  //Polygon
+        //const K = { x: 90, y: 120, label: "K" };
+        // c.n2({ n1: A, n2: K, len: 'const' })
+        // .n3({ n1: B, n2: A,n3:K, ang:'const' });
+        // g.ply({pts: [A,K,B],closed:true,lw:2}).nod(K);  //Polygon
 
         //Definition der Interaktions- und Animationsmethoden
         interactor
             .on('tick', (e) => {
                 c.correct();
                 g.exe(selector).exe(ctx);
-            })            
+            })
             .on('drag', (e) => {
                 if (selector.selection && selector.selection.drag) {
-                    selector.selection.drag({x:e.xusr,y:e.yusr,
-                         dx:e.dxusr,dy:e.dyusr,mode:'drag' });
+                    selector.selection.drag({
+                        x: e.xusr, y: e.yusr,
+                        dx: e.dxusr, dy: e.dyusr, mode: 'drag'
+                    });
                 }
             })
             .startTimer();
     </script>
 </body>
+
 </html>

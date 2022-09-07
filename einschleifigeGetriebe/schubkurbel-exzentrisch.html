@@ -13,8 +13,8 @@
     <button onclick="c.correct();g.exe(ctx);c.log()">correct</button><br>
     <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:transparent"></canvas><br>
     <span id="out"></span>
-    <script src="./../lib/g2-ng/g2.js"></script>
-    <script src="./../lib/cstr2/cstr.js"></script>
+    <script src="./../lib/g2.js"></script>
+    <script src="./../lib/cstr.js"></script>
     <script>
         const ctx = document.getElementById('c').getContext('2d');
         const interactor = canvasInteractor.create(ctx, { x: 200, y: 200, cartesian: true });
@@ -23,7 +23,7 @@
         const e = 60;
         const A0 = { x: 0, y: 0, base: true, label: 'A0', lbloc: 's' };
         const AB0 = { x: 0, y: -e };
-        const B0 = { x: 4 * e, y: -e };
+        
         const A = { x: 0, y: e, m: 10, label: 'A', lbloc: 'n' };
         const B = { x: 3 * e, y: -e, m: 1, label: 'B', lbloc: 'n' };
 
@@ -36,11 +36,14 @@
             // .ply({ pts: [A0, AB0, B0], ls: 'navy', lw: 1.5, ld: [22, 8, 2, 8] })
             .gnd(A0)                                   // grounds, joints
             .hdl(A)
+            .nod(AB0)
             .slider({ p: B, w: 0, label: 'B' })
 
         const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const' })
             .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
-            .n3({ id: 'A0B', n1: AB0, n2: B0, n3: B, ang: 0 })
+            //.n3({ id: 'A0B', n1: AB0, n2: B0, n3: B, ang: 0 })
+            .n2({id: 'AB0B', n1: AB0, n2: B, ang: 'const'})
+            .n2({id: 'A0B0', n1: A0, n2: AB0, len: 'const'})
 
         let itrpeak = 0;
 

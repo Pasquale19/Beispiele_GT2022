@@ -4,59 +4,106 @@
 <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Viergelenk - anim</title>
+    <title>Wiper mechanism</title>
 </head>
 
 <body>
-    <h1 style="text-align:center;width:98vw">Viergelenk - anim</h1>
+    <h1 style="text-align:center;width:98vw">Wiper - mechanism</h1>
     <pre id="out">?</pre>
     <button onclick="c.correct();g.exe(ctx);c.log()">correct</button><br>
-    <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:transparent"></canvas><br>
+    <button onclick="printNode()">print</button><br>
+    <canvas id="c" width="901" height="701" style="border:1px solid black;background-color:transparent"></canvas><br>
     <span id="out"></span>
-    <script src="./../lib/g2-ng/g2.js"></script>
-    <script src="./../lib/cstr2/cstr.js"></script>
+    <script src="./../lib/g2.js"></script>
+    <script src="./../lib/cstr.js"></script>
     <script>
         const ctx = document.getElementById('c').getContext('2d');
-        const interactor = canvasInteractor.create(ctx, { x: 200, y: 200, cartesian: true });
+        const interactor = canvasInteractor.create(ctx, { x: 550, y: 200, cartesian: true });
         const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
 
-        const e = 60;
-        const A0 = { x: 0, y: 0, base: true, label: "A0", lbloc: "s", lbloc: "s" };
-        const B0 = { x: 3 * e, y: -1 * e, base: true, label: "B0", lbloc: "s" };
-        const A = { x: 0, y: e, m: 8, label: "A", lbloc: "n", r: 8 };
-        const B = { x: 2 * e, y: e, m: 1, label: "B", lbloc: "n" };
+        const e = 25;
+        //const O = { x: 0, y: 0, label: "O" };
+        const A0 = { x: 0, y: 0, base: true, label: "A\u2080", lbloc: "s" };
+        const B0 = { x: 78, y: 87, base: true, label: "B\u2080", lbloc: "e" };
+        const C0 = { x: -241, y: B0.y, base: true, label: "C\u2080", lbloc: "w" };
+        const lB0C0 = B0.x - C0.x;
+        const A = { x: e, y: 0, m: 8, label: "A", lbloc: "n", r: 8 };
+        const B = { x: 108, y: 74, m: 1, label: "B", lbloc: "e" };
+        const C = { x: C0.x + (B.x - B0.x), y: B.y, m: 1, label: "C", lbloc: "s" };
+        const D = { x: -43, y: 169, m: 1, label: "D", lbloc: "e" };
+        const E = { x: D.x - lB0C0, y: D.y, m: 1, label: "E", lbloc: "e" };
+        const F1 = { x: 49, y: 138, m: 1, label: "F\u2081", lbloc: "e" };
+        const F2 = { x: -172, y: 201, m: 1, label: "F\u2082", lbloc: "e" };
+        const K1 = { x: F1.x - lB0C0, y: F1.y, m: 1, label: "K\u2081", lbloc: "e" };
+        const K2 = { x: F2.x - lB0C0, y: F2.y, m: 1, label: "K\u2082", lbloc: "e" };
 
         const g = g2().clr()                               // important with 'interaction'
             .view(interactor.view)               // important also !
-            //.grid()
-            .lin({ p1: A, p2: B, ls: 'navy', lw: 3 })
-            .lin({ p1: A0, p2: A, ls: 'navy', lw: 3 })
-            .lin({ p1: B0, p2: B, ls: 'navy', lw: 3 })
-            .lin({ p1: A0, p2: B0, ls: 'navy', lw: 1.5, ld: [22, 8, 2, 8] })
-            .gnd(A0)                                   // grounds, joints, poles
-            .gnd(B0)
-            .nod(A)
-            .nod(B)
 
-        const c = cstr().n2({ id: 'A0A', n1: A0, n2: A, len: 'const', ang: "const" })
+            // .img({ uri: "./WiperMech.png", x: -491, y: -29 })
+            //.grid()
+            .ply({ pts: [A0, A, B, B0, D, F1, F2, D], ls: 'navy', lw: 3 })
+            .ply({ pts: [B, C, C0, E, K1, K2, E], ls: 'navy', lw: 3 })
+            // .lin({ p1: A0, p2: B0, ls: 'navy', lw: 1.5, ld: [22, 8, 2, 8] })
+            .gnd(A0).gnd(B0).gnd(C0)                               // grounds, joints, poles
+            .hdl(A).hdl(B).hdl(C).nod(D)
+            .nod(E).nod(F1).nod(K1).nod(F2).nod(K2)
+            //.hdl(O)
+
+
+            .exe(ctx);
+
+        const c = cstr()
+            .n2({ id: 'A0A', n1: A0, n2: A, len: 'const', ang: 'const' })
             .n2({ id: 'AB', n1: A, n2: B, len: 'const' })
             .n2({ id: 'B0B', n1: B0, n2: B, len: 'const' })
+            .n3({ n1: B, n2: B0, n3: D, ang: 'const' })
+            .n2({ id: 'B0D', n1: B0, n2: D, len: 'const' })
+            .n2({ n1: F1, n2: F2, len: 'const' })
+            .n3({ n1: D, n2: F1, n3: F2, ang: 0 })
+            .n3({ n1: B0, n2: D, n3: F1, ang: 'const' })
+
+
+        c
+            .n2({ id: 'C0C', n1: C0, n2: C, len: "const" })
+            //.n2({ id: 'C0C', n1: C0, n2: C, get len() { return c.byId('B0B').l; } })
+            .n2({ n1: K1, n2: K2, len: 'const' })
+            .n3({ n1: E, n2: K1, n3: K2, ang: 0 })
+            .n3({ n1: C0, n2: E, n3: K1, ang: 'const' })
+            .n2({ n1: C0, n2: E, len: 'const' })
+            .n3({ n1: C, n2: C0, n3: E, ang: 'const' })
+            .n2({ id: 'BC', n1: B, n2: C, len: 'const' })
 
         let itrpeak = 0, itrmax = 0;
         const crank = c.byId('A0A');
         interactor
+            .init((e) => {
+
+            })
             .on('tick', (e) => {
                 crank.ang += Math.PI / 180;
-                phiKurbel = crank.ang;
                 const itr = c.correct();
                 document.getElementById('out').innerHTML = `itr(max/cur) = ${itrmax = Math.max(itr, itrmax)} / ${itr}`;
-                g.exe(ctx);
+                g.exe(selector).exe(ctx);
+            })
+            .on('wheel', (e) => {   // zooming about pointer location ...=> CanvasInteractor
+                interactor.view.x = e.x + e.dscl * (interactor.view.x - e.x);
+                interactor.view.y = e.y + e.dscl * (interactor.view.y - e.y);
+                interactor.view.scl *= e.dscl;
             })
             .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
-
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag) {
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+                }
+            })
             .startTimer();
 
-    </script>
-</body>
+        function printNode() {
+            console.clear();
+            /// console.log("O " + "x " + O.x + " y " + O.y + "\n");
+            console.log("B0C0 " + "dist " + lB0C0);
+        }
 
-</html>
+    </script>
+    </bo

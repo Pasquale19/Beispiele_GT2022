@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>no constraint</title>
+</head>
+
+<body>
+    <h1>no constraint</h1>
+    <pre id="out">?</pre>
+    <canvas id="c" width="201" height="101" style="border:1px solid black;background-color:#eee;"></canvas><!-- <ctrl-ing></ctrl-ing> -->
+<!--<script src="../../ctrl-ing/ctrl-ing.js"></script> -->
+<script src="../../g2-ng/g2.js"></script>
+<script src="../cstr.js"></script>
+<script>
+
+const ctx = document.getElementById('c').getContext('2d');
+const interactor = canvasInteractor.create(ctx, {x:40,y:40,scl:1,cartesian:true});
+const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+
+const pi = Math.PI;
+const A = {x:0,y:0,label:'A'};
+const B = {x:120,y:40,label:'B'};
+const C = {x:60,y:20,label:'C'};
+
+const g = g2().clr()                           // important with 'interaction'
+              .view(interactor.view)           // view sharing ... !
+              .grid()
+              .lin({p1:A,p2:B,ls:'navy',lw:3})
+              .lin({p1:A,p2:C,ls:'navy',lw:3})
+              .hdl(A)
+              .hdl(B)
+              .hdl(C)
+
+const c = cstr().n2({id:'AB',n1:A,n2:B})
+                .n2({n1:A,n2:C,
+                     len:cstr.len.from('AB',1/2),
+                     ang:cstr.ang.from('AB')})
+
+interactor
+    .on('tick', (e) => {
+            document.getElementById('out').innerHTML = 'itr=' + c.correct();
+            g.exe(selector).exe(ctx); 
+        })
+//    .on('pan',  (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+    .on('drag', (e) => { 
+        if (selector.selection && selector.selection.drag) {
+           selector.selection.drag({x:e.xusr,y:e.yusr,dx:e.dxusr,dy:e.dyusr,mode:'drag'});
+        }
+    })
+    .startTimer();
+</script>
+
+<style>
+    .ctrl {
+        /* grid layout */
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        grid-column-gap: 2px;
+
+        border-radius:5px;
+        padding: 0.2em;
+        width: 10em;
+        background-color:#ccc;
+
+        /* top right corner position */
+        position: absolute;
+        top: 4px;
+        right: 4px;
+    }
+    .ctrl > span {
+        background-color:#aaa;
+
+    }
+</style>
+<aside class="ctrl">
+    <span>hello</span>
+    <span>world</span>
+    <span>hello</span>
+    <span>world</span>
+</aside>
+
+</body>
+</html>
