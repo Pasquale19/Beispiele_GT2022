@@ -98,7 +98,7 @@
         interactor
             .on('tick', (e) => {
                 const itr = c.correct();
-                document.getElementById('out').innerHTML = `itr/max= ${itr} / ${itrpeak = Math.max(itr, itrpeak)}`;
+                document.getElementById('out').innerHTML = `itr/max= ${itr} / ${itrpeak = Math.max(itr, itrpeak)}  \t\t Dof:${c.dof}`;
                 g.exe(selector).exe(ctx);
             })
             .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })

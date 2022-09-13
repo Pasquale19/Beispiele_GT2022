@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rope</title>
+</head>
+
+<body>
+    <h1>Rope</h1>
+    <pre id="out">?</pre>
+    <canvas id="c" width="601" height="401" style="border:1px solid black;background-color:transparent;"></canvas><br>
+<script src="../lib/g2.js"></script>
+<script src="../lib/cstr.js"></script>
+<script>
+
+const ctx = document.getElementById('c').getContext('2d');
+const interactor = canvasInteractor.create(ctx, {x:300,y:300,scl:1,cartesian:true});
+const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+
+const pi = Math.PI, max = Math.max, min = Math.min, hypot = Math.hypot;
+const e = 40; // unit vector
+const A0= {x:0,y:0,base:true, label:{str:"A\u2080", loc:"n"}};
+const A = {x:3*e,y:0,m:1, label:{str:"A", loc:"n"}};
+const B = {x:0,y:-3*e,w:pi/2,m:1, label:{str:"B", loc:"w"}};
+const L = hypot(A.x,A.y) + hypot(B.x,B.y);
+
+const g = g2().clr()                           // important with 'interaction'
+              .view(interactor.view)           // view sharing ... !
+              //.grid()
+              .lin({p1:B,p2:A0,ls:'navy',lw:3,label:"@len"})
+              .lin({p1:A,p2:A0,ls:'navy',lw:3,label:"@len"})
+              .ply({pts:[A,A0,B],ls:'navy',lw:3})
+              .gnd(A0)
+              .hdl(A)
+              .nodflt(B)
+              .txt({str:`L=${Math.round(L)}`,x: 2*e,y:-1.4*e,ls:"navy"})
+
+const c = cstr().n2({id:'A0A',n1:A0,n2:A,get len() {return min(L, this.r);} })
+                .n2({id:'A0B',n1:A0,n2:B,ang:'const',get len() {return max(L - this.root.byId('A0A').r, 1); }})
+
+interactor
+    .on('tick', (e) => {
+            document.getElementById('out').innerHTML = 'itr=' + c.correct();
+            g.exe(selector).exe(ctx); 
+        })
+    .on('pan',  (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+    .on('drag', (e) => { 
+            if (selector.selection && selector.selection.drag) {
+                selector.selection.drag({x:e.xusr,y:e.yusr,dx:e.dxusr,dy:e.dyusr,mode:'drag'});
+        }
+    })
+    .startTimer();
+</script>
+</body>
+</html>

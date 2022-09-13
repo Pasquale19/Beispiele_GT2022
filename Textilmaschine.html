@@ -91,7 +91,7 @@
             .on('tick', (e) => {                
                 crank.ang += Math.PI / 180;
                 const itr = c.correct();
-                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrmax = Math.max(itr, itrmax)} / ${itr} \t\t Dof:${c.dof}`;
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrmax = Math.max(itr, itrmax)} / ${itr} \t\t DoF:${c.dof}`;
                 g.exe(ctx);
                 if (crank.ang >= 130 * Math.PI / 2)
                     interactor.endTimer();

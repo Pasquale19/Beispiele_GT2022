@@ -120,7 +120,7 @@
                 Object.assign(dataPnt, chart.pntOf({ x: (crank.ang * 180 / pi) % 360, y:F0F.r  })); //rechnet den Punkt {x,y} im Graph einem Datenpunkt zu
                 g.exe(ctx); 
                 
-                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrmax = Math.max(itr, itrmax)} / ${itr}`;
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrmax = Math.max(itr, itrmax)} / ${itr} \t\t DoF:${c.dof}`;
                
                 if (crank.ang >= 130 * Math.PI / 2)
                     interactor.endTimer();               

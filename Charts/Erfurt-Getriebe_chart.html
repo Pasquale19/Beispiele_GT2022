@@ -48,7 +48,7 @@
             x: 220, y: H0.y - 400, b: 280, h: 300,
             xmin: 0, xmax: 360,
             ymin: 00, ymax: 300,
-            funcs: () => [ {data,fill:true},{ data2, fill: true }], //fill färbt die Fläche unter der Kurve
+            funcs: () => [{ data:data, fill: false }, { data:data2, fill: true }], //fill färbt die Fläche unter der Kurve
             title: { text: "Hub Schieber D" },
             xaxis: { title: "Kurbelwinkel [°]", grid: false, origin: true },
             yaxis: { title: "Hub [mm]", grid: false }
@@ -117,7 +117,7 @@
             .n2({ id: 'FG', n1: F, n2: G, len: 'const' })
             //.n3({ id: 'A0FG', n1: A0, n2: F, n3: G, ang: 'const' })
             .n2({ id: 'GH', n1: G, n2: H, len: 'const' })
-            .n2({ id: 'H0H', n1: H0, n2: H, ang:'const' })
+            .n2({ id: 'H0H', n1: H0, n2: H, ang: 'const' })
             .n2({ id: 'JK', n1: J, n2: K, len: 'const' })
             .n2({ id: 'K0K', n1: K0, n2: K, ang: 'const' })
         g.exe(ctx);
@@ -127,17 +127,16 @@
         let itrpeak = 0;
         const H0H = c.byId('H0H');
         const K0K = c.byId('K0K');
-        function ratio(data, data2) {            
+        function ratio(data, data2) {
             const w0 = crank.ang;
-            for (let w = 0; w < 2 * pi; w += pi / 18) {
-                crank.ang = w0 + w;
+            for (let w = 0; w < 2 * pi; w += pi / 360) {
+                crank.ang = (w0 + w)%(2*pi);
                 c.correct();
-                data.push(crank.ang * 180 / pi, (H0H.r - 1));
-                data2.push(crank.ang * 180 / pi, (K0K.r - 1));
+                data.push(crank.ang * 180 / pi, (H0H.r - 50));
+                data2.push(crank.ang * 180 / pi, (K0K.r - 50));
             }
-            console.log(data2);
             crank.ang = w0;
-            c.correct();            
+            c.correct();
         }
 
 
@@ -146,8 +145,8 @@
             .on('tick', (e) => {
                 crank.ang = (crank.ang + pi / 360) % (4 * pi);
                 const itr = c.correct();
-                Object.assign(dataPnt, chart.pntOf({ x: (crank.ang * 180 / pi) % 360, y: H0H.r-1 }));
-                Object.assign(dataPnt2, chart.pntOf({ x: (crank.ang * 180 / pi) % 360, y:K0K.r-1 }));
+                Object.assign(dataPnt, chart.pntOf({ x: (crank.ang * 180 / pi) % 360, y: H0H.r - 50 }));
+                Object.assign(dataPnt2, chart.pntOf({ x: (crank.ang * 180 / pi) % 360, y: K0K.r - 50 }));
                 g.exe(ctx);
                 document.getElementById('out').innerHTML = `itr(max/cur) = ${itrpeak = Math.max(itr, itrpeak)} / ${itr} \t\t Dof:${c.dof}`;
             })
