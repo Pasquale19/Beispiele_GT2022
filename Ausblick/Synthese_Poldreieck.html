@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Synthese Poldreieck</title>
+</head>
+
+<body>
+    <h1 style="text-align:center;width:98vw">Synthese Poldreieck</h1>
+    <pre id="out">?</pre>
+    <canvas id="c" width="601" height="601" style="border:1px solid black;background-color:transparent;"></canvas><br>
+    <span id="out"></span>
+    <script src="./../lib/g2.js"></script>
+
+    <!-- <script src="./../lib/g2-ng/g2.lib.js"></script>-->
+    <script src="./../lib/cstr.js"></script>
+
+    <button id="btn" onclick=clicked()>Debug</button>
+    <script>
+        const pi = Math.PI;
+        const ctx = document.getElementById('c').getContext('2d');
+        const interactor = canvasInteractor.create(ctx, { x: 00, y: 200, cartesian: true });
+        const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
+        const r_P = 0.1;
+        const l_lage = 100;
+        const col_lage = "red";
+        const col_0 = "green"
+        const col_help = "grey";
+
+        const O = { x: 0, y: 0, base: true, label: { str: 'O', loc: 'sw' } },//Nullpunkt
+            A1 = { x: 117.95, y: 65.94, label: { str: 'A\u2081', loc: 'nw' }, m: 10, ls: col_lage, fs: col_lage },
+            A2 = { x: 339.18, y: 179.12, label: { str: 'A\u2082', loc: 'n' }, m: 10, ls: col_lage, fs: col_lage },
+            A3 = { x: 365.76, y: -0.09, label: { str: 'A\u2083', loc: 'nw' }, m: 10, ls: col_lage, fs: col_lage },
+            B1 = { x: 137.01, y: 164.1, label: 'B\u2081', ls: col_lage, lbloc: "w" },
+            B2 = { x: 255.55, y: 233.95, label: 'B\u2082', ls: col_lage, lbloc: "n" },
+            B3 = { x: 461.88, y: -27.68, label: 'B\u2083', ls: col_lage },
+            MA12 = { x: 228.57, y: 122.53, label: 'MA\u2081\u2082' },
+            MA13 = { x: 241.86, y: 32.93, label: 'MA13' }
+        A0 = { x: 253, y: 74.76, label: 'A\u2080', lbloc: 'nw',ls:col_0 },
+            MB12 = { x: 196.28, y: 199.03, label: 'MB\u2081\u2082' },
+            MB13 = { x: 289.92, y: 19.13, label: 'MB\u2081\u2083' },
+            B0 = { x: 286.39, y: 46.1, label: 'B\u2080',ls:col_0 ,lbloc:"sw"},
+            P12 = { x: 144.25, y: 287.32, label: 'P\u2081\u2082', lbloc: "n" },
+            P13 = { x: 211.62, y: -80.56, label: 'P\u2081\u2083' },
+            P23 = { x: 338.89, y: 87.5, label: 'P\u2082\u2083' }
+            ;
+
+        const c = cstr().n2({ id: 'A1B1', n1: A1, n2: B1, len: l_lage })
+            .n2({ id: 'A2B2', n1: A2, n2: B2, len: l_lage })
+            .n2({ id: 'A3B3', n1: A3, n2: B3, len: l_lage })
+            //A0
+            .n2({ id: 'A1A2', n1: A1, n2: A2 })
+            .n2({ id: 'A1A3', n1: A1, n2: A3 })
+            .n2({
+                n1: A1, n2: MA12, len: cstr.len.from('A1A2', 0.5),
+                ang: cstr.ang.from('A1A2')
+            })
+            .n2({
+                n1: A1, n2: MA13, len: cstr.len.from('A1A3', 0.5),
+                ang: cstr.ang.from('A1A3')
+            })
+            .n2({ n1: MA12, n2: A0, ang: cstr.ang.from('A1A2', pi / 2) })
+            .n2({ n1: MA13, n2: A0, ang: cstr.ang.from('A1A3', pi / 2) })
+            //B0
+            .n2({ id: 'B1B2', n1: B1, n2: B2 })
+            .n2({ id: 'B1B3', n1: B1, n2: B3 })
+            .n2({
+                n1: B1, n2: MB12, len: cstr.len.from('B1B2', 0.5),
+                ang: cstr.ang.from('B1B2')
+            })
+            .n2({
+                n1: B1, n2: MB13, len: cstr.len.from('B1B3', 0.5),
+                ang: cstr.ang.from('B1B3')
+            })
+            .n2({ n1: MB12, n2: B0, ang: cstr.ang.from('B1B2', pi / 2) })
+            .n2({ n1: MB13, n2: B0, ang: cstr.ang.from('B1B3', pi / 2) })
+            //Poldreieckpunkte
+            .n2({ n1: MA12, n2: P12, ang: cstr.ang.from('A1A2', pi / 2) })
+            .n2({ n1: MB12, n2: P12, ang: cstr.ang.from('B1B2', pi / 2) })
+            .n2({ n1: MA13, n2: P13, ang: cstr.ang.from('A1A3', pi / 2) })
+            .n2({ n1: MB13, n2: P13, ang: cstr.ang.from('B1B3', pi / 2) })
+            .n2({ n1: MA12, n2: P12, ang: cstr.ang.from('A1A2', pi / 2) })
+            .n2({ n1: MB12, n2: P12, ang: cstr.ang.from('B1B2', pi / 2) })
+
+
+
+
+        const g = g2().clr()                           // important with 'interaction'
+            .view(interactor.view)           // view sharing ... !           
+            .grid()
+            .ply({ pts: [P12, P23, P13], closed: true, fs: "#f2f2a0", lw: 2 })
+            .beg({ lw: 3 })
+            .lin({ p1: A1, p2: B1, ls: col_lage })
+            .lin({ p1: A2, p2: B2, ls: col_lage })
+            .lin({ p1: A3, p2: B3, ls: col_lage })
+            .end()
+            .beg({ lw: 2, ld: [2, 2] })
+            .ply({ pts: [A1, A2, MA12, A0, MA13, A3, A1], closed: false, ls: col_help })
+            .ply({ pts: [B1, B2, MB12, B0, MB13, B3, B1], closed: false, ls: col_help })
+            .end()
+            
+            .hdl(A1).hdl(A2).hdl(A3).hdl(B1).hdl(B2).hdl(B3)
+            //.nod(MA12).nod(MA13).nod(MB12).nod(MB13)            
+            .nod(P12).nod(P23).nod(P13)
+            
+            .beg({ lw: 3, ls: col_0 })
+                .lin({ p1: A0, p2: B0 }).nod(A0).nod(B0)
+            .end()
+        // .hdl(O)
+
+        g.exe(ctx);
+
+
+        let itrmax = 0, itrpeak = 0;
+
+        interactor
+            .init((e) => {
+            })
+            .on('tick', (e) => {
+                const itr = c.correct();
+                document.getElementById('out').innerHTML = `max/itr= ${itrpeak = Math.max(itr, itrpeak)} / ${itr} \t\t DoF:${c.dof}`;
+                g.exe(selector).exe(ctx);
+            })
+            .on('wheel', (e) => {   // zooming about pointer location ...=> CanvasInteractor
+                interactor.view.x = e.x + e.dscl * (interactor.view.x - e.x);
+                interactor.view.y = e.y + e.dscl * (interactor.view.y - e.y);
+                interactor.view.scl *= e.dscl;
+            })
+            .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
+            .on('drag', (e) => {
+                if (selector.selection && selector.selection.drag) {
+                    selector.selection.drag({ x: e.xusr, y: e.yusr, dx: e.dxusr, dy: e.dyusr, mode: 'drag' });
+                }
+            })
+            .startTimer();
+
+        function clicked() {
+            console.log(`O: x:${O.x} y:${O.y} `);
+            console.log(`A1: x:${A1.x} y:${A2.y} `);
+        }; 
+    </script>
+
+</body>
+
+</html>

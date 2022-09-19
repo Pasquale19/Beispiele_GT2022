@@ -26,6 +26,7 @@
         const interactor = canvasInteractor.create(ctx, { x: 100, y: 300, scl: 0.75, cartesian: true });
         const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
         const linkColor = "black";
+        const TextElem={str:"",x:50,y:900};
         const A0 = { x: 0, y: 600, base: true, label: "A\u2080", lbloc: "w", scl: 1.2 };
         const B0 = { x: 330, y: 945, base: true, label: "B\u2080", scl: 1.2 };
         const D0 = { x: 450, y: 426, base: true, label: "D\u2080", scl: 1.2 };
@@ -47,19 +48,20 @@
         const chart = {
             x: 220, y: H0.y - 400, b: 280, h: 300,
             xmin: 0, xmax: 360,
-            ymin: 00, ymax: 300,
-            funcs: () => [{ data:data, fill: false }, { data:data2, fill: true }], //fill färbt die Fläche unter der Kurve
-            title: { text: "Hub Schieber D" },
+            ymin: 00, ymax: 304,
+            funcs: () => [{ data: data, fill: false }, { data: data2, fill: false }], //fill färbt die Fläche unter der Kurve
+            title: { text: "Hub Schieber H und K" },
             xaxis: { title: "Kurbelwinkel [°]", grid: false, origin: true },
             yaxis: { title: "Hub [mm]", grid: false }
         };
-        const dataPnt = { x: 0, y: D0.y - 200 },
-            dataPnt2 = { x: 0, y: 0 }; //moving Point in Graph
+        const dataPnt_H = { x: 0, y: D0.y - 200, label: "H" },
+            dataPnt_K = { x: 0, y: 0, label: "K" }; //moving Point in Graph
 
 
         const g = g2().clr()                           // important with 'interaction'
             .view(interactor.view)           // view sharing ... !
             // .grid()
+            .txt(TextElem)
             .lin({ p1: A0, p2: A, ls: linkColor, lw: 3 })
             .lin({ p1: A, p2: B, ls: linkColor, lw: 3 })
             .lin({ p1: B0, p2: B, ls: linkColor, lw: 3 })
@@ -89,8 +91,8 @@
             .slider({ p: K, w: Math.PI / 2, label: "K", lbloc: "e" })
 
             .chart(chart)
-            .nod(dataPnt)
-            .nod(dataPnt2)
+            .nod(dataPnt_H)
+            .nod(dataPnt_K)
             .gnd(H0).gnd(K0)
 
 
@@ -129,11 +131,18 @@
         const K0K = c.byId('K0K');
         function ratio(data, data2) {
             const w0 = crank.ang;
+            
+            let dataPts = [];
             for (let w = 0; w < 2 * pi; w += pi / 360) {
-                crank.ang = (w0 + w)%(2*pi);
+                crank.ang = (w0 + w) % (2 * pi);
                 c.correct();
-                data.push(crank.ang * 180 / pi, (H0H.r - 50));
-                data2.push(crank.ang * 180 / pi, (K0K.r - 50));
+                dataPts.push({ x: crank.ang * 180 / pi, y: (H0H.r - 50), y1: (K0K.r - 50) });
+            }
+
+            dataPts.sort((a, b) => a.x - b.x);      
+            for (i of dataPts) {
+                data.push(i.x, i.y);
+                data2.push(i.x, i.y1);
             }
             crank.ang = w0;
             c.correct();
@@ -145,10 +154,11 @@
             .on('tick', (e) => {
                 crank.ang = (crank.ang + pi / 360) % (4 * pi);
                 const itr = c.correct();
-                Object.assign(dataPnt, chart.pntOf({ x: (crank.ang * 180 / pi) % 360, y: H0H.r - 50 }));
-                Object.assign(dataPnt2, chart.pntOf({ x: (crank.ang * 180 / pi) % 360, y: K0K.r - 50 }));
+                Object.assign(dataPnt_H, chart.pntOf({ x: (crank.ang * 180 / pi) % 360, y: H0H.r - 50 }));
+                Object.assign(dataPnt_K, chart.pntOf({ x: (crank.ang * 180 / pi) % 360, y: K0K.r - 50 }));
+                TextElem.str=`itr(max/cur) = ${itrpeak = Math.max(itr, itrpeak)} / ${itr}`; 
                 g.exe(ctx);
-                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrpeak = Math.max(itr, itrpeak)} / ${itr} \t\t Dof:${c.dof}`;
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrpeak = Math.max(itr, itrpeak)} / ${itr} \t\t DoF:${c.dof}`;
             })
             .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
             .on('wheel', (e) => {   // zooming about pointer location ...

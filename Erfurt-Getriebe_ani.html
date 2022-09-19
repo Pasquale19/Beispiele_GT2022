@@ -116,7 +116,7 @@ let itrpeak = 0;
                 const itr = c.correct();
                 g.exe(ctx);     
                 TextElem.str=`itr(max/cur) = ${itrpeak = Math.max(itr, itrpeak)} / ${itr}`;      
-                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrpeak = Math.max(itr, itrpeak)} / ${itr} \t\t Dof: ${c.dof}`;
+                document.getElementById('out').innerHTML = `itr(max/cur) = ${itrpeak = Math.max(itr, itrpeak)} / ${itr} \t\t DoF: ${c.dof}`;
             })
             .on('pan', (e) => { interactor.view.x += e.dx; interactor.view.y += e.dy; })
             .on('wheel', (e) => {   // zooming about pointer location ...
